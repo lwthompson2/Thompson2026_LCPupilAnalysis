@@ -11,8 +11,6 @@ close all
 
 % Flag
 collect_data = true;
-save_figs = false;
-do_zscore = false;
 
 % Collect data from both monkeys
 monkeys = {'Oz' 'Cicero'};
@@ -31,6 +29,7 @@ pupil_baseline_times = times(1,1):times(1,2);
 pupil_evoked_times = times(2,1):times(2,2);
 ith_unit = 0;
 spike_rate_data = [];
+do_zscore = true;
 
 %% Plot Options
 figure; hold on;
@@ -169,7 +168,7 @@ if collect_data
                         spike_rate_data(:,2,uu) = spike_data(:,2,uu)./ ...
                             diff(times(4,:)).*1000;
                         
-                        Lg = isfinite(spike_rate_data(:,1,uu)) & isfinite(pupil_data(:,1)) & isfinite(pupil_data(:,2)) & zscore(spike_rate_data(:,2,uu))<8;
+                        Lg = isfinite(spike_rate_data(:,1,uu)) & isfinite(pupil_data(:,1)) & isfinite(pupil_data(:,2)) & zscore(spike_rate_data(:,2,uu))<10;
                         Lg_fix = isfinite(spike_rate_fix_data(:,uu)) & isfinite(pupil_fix_data);
                         if do_zscore
                             % Get all the firing rate data including evoked

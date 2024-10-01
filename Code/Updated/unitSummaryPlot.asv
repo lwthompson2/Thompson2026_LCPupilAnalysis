@@ -91,6 +91,31 @@ xlabel({'Baseline Pupil', '(residuals)'})
 ylabel({'Baseline FR', '(residuals)'})
 axis square;
 
+%% Evoked relationships
+subplot(3,4,6); hold off;
+plot(sub_p_evoked,sub_FR_evoked,'ok','MarkerFaceColor',[0.5 0.5 0.5])
+j = lsline;
+j.Color = 'k';
+if stats.p <0.05
+    title('Evoked Responses')
+else
+    title('Evoked Responses')
+end
+xlabel({'Evoked Pupil', '(baseline subtracted)'})
+ylabel({'Evoked FR', '(baseline subtracted)'})
+axis square;
+
+% Joshi:
+% Spearman%s partial correlation, r, 
+% between spiking (spike rate, 0–200 ms following beep onset 
+% minus baseline spike rate measured during fixation prior to beep onset) 
+% and pupil (maximum change in pupil diameter 0–800 ms following beep 
+% onset) responses, accounting for the effects of baseline pupil diameter 
+% on both variables.
+[stats.partial_evoked_r, stats.partial_evoked_p] = partialcorr(raw_p_evoked, sub_FR_evoked, LC_Beep_data(:,4),'Type','Spearman');
+% Alternatively, why not just compare the baseline subtracted responses
+% directly?
+[stats.bs_evoked_r, stats.bs_evoked_p] = corr(sub_p_evoked, sub_FR_evoked,'Type','Spearman');
 
 %% 2) Is baseline pupil related to evoked pupil?
 
@@ -211,9 +236,9 @@ legend off;
 % onset) responses, accounting for the effects of baseline pupil diameter 
 % on both variables.
 
-% baseline pupil, raw evoked evoked FR?  baseline FR?
+                                                                                   % baseline pupil, baseline subtracted evoked FR?  baseline FR?
 [stats.partial_base_p_evoked_FR_r, stats.partial_base_p_evoked_FR_p] = partialcorr(LC_Beep_data(:,4), raw_FR_evoked, LC_Beep_data(:,6),'Type','Spearman');
-% [stats.partial_base_p_evoked_FR_r, stats.partial_base_p_evoked_FR_p] = partialcorr(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)), raw_FR_evoked, spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)),'Type','Spearman')
+
 
 %% 5) Is evoked pupil related to baseline FR?
 %   b) baseline subtracted evoked
@@ -251,39 +276,11 @@ ylabel('Baseline FR (residuals)')
 axis square;
 legend off;
 
-% baseline FR, raw evoked pupil, baseline pupil
+% 
 [stats.partial_base_FR_evoked_p_r, stats.partial_base_FR_evoked_p_p] = partialcorr(LC_Beep_data(:,6), raw_p_evoked, LC_Beep_data(:,4),'Type','Spearman');
 
 
 %% 6) Is evoked pupil related to evoked FR?
-subplot(3,4,6); hold off;
-plot(sub_p_evoked,sub_FR_evoked,'ok','MarkerFaceColor',[0.5 0.5 0.5])
-j = lsline;
-j.Color = 'k';
-if stats.p <0.05
-    title('Evoked Responses')
-else
-    title('Evoked Responses')
-end
-xlabel({'Evoked Pupil', '(baseline subtracted)'})
-ylabel({'Evoked FR', '(baseline subtracted)'})
-axis square;
-
-% Joshi:
-% Spearman%s partial correlation, r, 
-% between spiking (spike rate, 0–200 ms following beep onset 
-% minus baseline spike rate measured during fixation prior to beep onset) 
-% and pupil (maximum change in pupil diameter 0–800 ms following beep 
-% onset) responses, accounting for the effects of baseline pupil diameter 
-% on both variables.
-[stats.partial_evoked_r, stats.partial_evoked_p] = partialcorr(raw_p_evoked, sub_FR_evoked, LC_Beep_data(:,4),'Type','Spearman');
-% Alternatively, why not just compare the baseline subtracted responses
-% directly?
-[stats.bs_evoked_r, stats.bs_evoked_p] = corr(sub_p_evoked, sub_FR_evoked,'Type','Spearman');
-
-
-
-
 %   a) raw evoked pupil vs baseline sub evoked FR
 stats.evoked_p_subevoked_FR = corr(corrected_p_evoked, sub_FR_evoked,'type','Spearman');
 %   b) raw evoked pupil vs raw evoked FR

@@ -7,19 +7,19 @@
 % Fit a line and look at a scatter plot of the linear fits (slope) over time?
 
 
-valid = isfinite(subevoked_p_base_FR_R) & isfinite(base_FR_subevoked_FR_R);
+valid = isfinite(stats.subevoked_p_base_FR_R) & isfinite(stats.base_FR_subevoked_FR_R);
 
 figure; hold on;
 subplot(1,4,1);
-plot(base_p_subevoked_p_R(valid).^2, pupil_evoked_mag(valid), 'o')
+plot(stats.base_p_subevoked_p_R(valid).^2, stats.mean_pupil_evoked_mag(valid), 'o')
 lsline;
 title('Pupil-Pupil')
 xlabel('R^2')
 ylabel('mean(abs(evoked pupil))')
-[R,P] = corr(base_p_subevoked_p_R(valid).^2', pupil_evoked_mag(valid)', 'type', 'Spearman')
+[R,P] = corr(stats.base_p_subevoked_p_R(valid).^2', stats.mean_pupil_evoked_mag(valid)', 'type', 'Spearman')
 
 subplot(1,4,2);
-plot(base_FR_subevoked_FR_R(valid).^2, spike_evoked_mag(valid), 'o')
+plot(stats.base_FR_subevoked_FR_R(valid).^2, stats.mean_spike_evoked_mag(valid), 'o')
 lsline
 title('Base FR Evoked FR')
 xlabel('R^2')

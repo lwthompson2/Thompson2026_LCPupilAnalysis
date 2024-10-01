@@ -1,0 +1,51 @@
+%% Generates a population summary plot for Joshi 2016 data
+% Created by LWT 9/24/2024
+
+% 1) Is baseline pupil related to baseline FR?
+% 2) Is baseline pupil related to evoked pupil?
+% 3) Is baseline FR related to evoked FR?
+% 4) Is baseline pupil related to evoked FR?
+% 5) Is evoked pupil related to baseline FR?
+plots = [9 10;... % baseline pupil, baseline FR
+    4 5;... % baseline pupil, evoked pupil: Are evoked pupil responses inversely related to baseline pupil? Yes
+    6 7;... % baseline FR, evoked FR: Are evoked spikes inversely related to baseline spikes?
+    4 7;... % baseline pupil, evoked FR: Are evoked spikes inversely related to baseline pupil?
+    5 6]; % evoked pupil, baseline FR: Are evoked pupil responses inversely related to tonic LC activity?
+
+num_plots = size(plots,1);
+figure; 
+vars = LC_Beep_labels; %{'monkey' 'session' 'unit', 'PD baseline' 'PD response' 'Spike baseline' 'Spike response'};
+for mm = 1:num_monkeys
+
+    % Each monk
+    Lm = LC_Beep_data(:,1)==mm; % trials matching this monkey
+
+    % Each plot
+    for pp = 1:num_plots
+        subplot(num_plots,num_monkeys,sub2ind([num_monkeys,num_plots],mm,pp)); hold on;
+        if pp == 1
+            xs = [LC_Beep_data(Lm & LC_Beep_data(:,2), plots(pp,1)), LC_Fix_data(7 & LC_Fix_data(:,2), plots(pp,1))];
+            ys = [LC_Beep_data(Lm & LC_Beep_data(:,2), plots(pp,2)), LC_Fix_data(8 & LC_Fix_data(:,2), plots(pp,2));
+        elseif pp == 2
+            % For pupil only data we need to select sessions rather than all units
+            xs = LC_Beep_data(Lm & LC_Beep_data(:,2), plots(pp,1));
+            ys = LC_Beep_data(Lm & LC_Beep_data(:,2), plots(pp,2));
+        else
+            xs = LC_Beep_data(Lm, plots(pp,1));
+            ys = LC_Beep_data(Lm, plots(pp,2));
+        end
+        Lg = isfinite(xs) & isfinite(ys);
+        if mm == 1
+            plot(xs, ys, 'o','MarkerFaceColor',[0.5 0.5 0.5], 'MarkerEdgeColor','k');
+        else
+            plot(xs, ys, 'd','MarkerFaceColor',[0.5 0.5 0.5], 'MarkerEdgeColor','k');
+        end
+        set(gca, 'FontSize', 12);
+        xlabel(vars{plots(pp,1)});
+        ylabel(vars{plots(pp,2)});
+        [R,P] = corr(xs(Lg), ys(Lg), 'type', 'Spearman');
+        title(sprintf('R=%.3f, P=%.3f', R, P))
+        lsline;
+        axis square;
+    end
+end
