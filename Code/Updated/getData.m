@@ -22,7 +22,7 @@ pup_pup_folders = {'None','Positive','Negative'};
 
 % time bins (all wrt beep onset)
 times = [ ...
-    -100    0;      % pupil baseline
+    -100    0;      % pupil basel10ine
     0       900;    % pupil evoked
     -500    0;      % spikes baseline
     0       200];   % spikes evoked
@@ -63,7 +63,7 @@ if collect_data
                     monkeys{mm}, ff, length(fnames)))
                 load(fullfile(base_dir, fnames{ff}));
                 unique_session = 1;
-
+                
                 %  siteData{1}: trialsxcols matrix, cols are:
                 %   1 ... fix start time wrt fixation on
                 %   2 ... fix end time wrt fix start time (fix duration)
@@ -164,6 +164,7 @@ if collect_data
                         
                         % Relationships for each neuron
                         ith_unit = ith_unit + 1;
+                        session_numbers_unique(ith_unit) = unique_session;
                         spike_rate_data(:,1,uu) = spike_data(:,1,uu)./ ...
                             diff(times(3,:)).*1000;
                         spike_rate_data(:,2,uu) = spike_data(:,2,uu)./ ...

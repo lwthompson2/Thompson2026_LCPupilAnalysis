@@ -21,15 +21,15 @@ for mm = 1:num_monkeys
     % Baseline Pupil vs Evoked Pupil
     subplot(1,5,2); hold on;
     % give random X positions
-    x = x_start(mm) + (3-1).*rand(sum(stats.base_p_subevoked_p<0.05 & m_units'),1);
-    scatter(x,stats.base_p_subevoked_p_R(stats.base_p_subevoked_p<0.05 & m_units'),80,plotOptions.monkey_symbols{mm},'MarkerFaceColor',[0 174 239]./255,'MarkerEdgeColor','none','MarkerFaceAlpha',1)
-    x = x_start(mm) + (3-1).*rand(sum(stats.base_p_subevoked_p>0.05 & m_units'),1);
-    scatter(x,stats.base_p_subevoked_p_R(stats.base_p_subevoked_p>0.05 & m_units'),80,plotOptions.monkey_symbols{mm},'MarkerFaceColor',[0 174 239]./255,'MarkerEdgeColor','none','MarkerFaceAlpha',0.2)
-    base_p_subevoked_p_R(mm) = signtest(stats.base_p_subevoked_p_R(m_units));
+    x = x_start(mm) + (3-1).*rand(sum(stats.base_p_subevoked_p<0.05 & m_units' & session_numbers_unique'),1);
+    scatter(x,stats.base_p_subevoked_p_R(stats.base_p_subevoked_p<0.05 & m_units' & session_numbers_unique'),80,plotOptions.monkey_symbols{mm},'MarkerFaceColor',[0 174 239]./255,'MarkerEdgeColor','none','MarkerFaceAlpha',1)
+    x = x_start(mm) + (3-1).*rand(sum(stats.base_p_subevoked_p>0.05 & m_units'  & session_numbers_unique'),1);
+    scatter(x,stats.base_p_subevoked_p_R(stats.base_p_subevoked_p>0.05 & m_units'  & session_numbers_unique'),80,plotOptions.monkey_symbols{mm},'MarkerFaceColor',[0 174 239]./255,'MarkerEdgeColor','none','MarkerFaceAlpha',0.2)
+    base_p_subevoked_p_R(mm) = signtest(stats.base_p_subevoked_p_R(m_units  & session_numbers_unique));
     if base_p_subevoked_p_R(mm) < 0.05
-        plot(x_start(mm) + [-0.5,2.5],[median(stats.base_p_subevoked_p_R(m_units),'omitnan'),median(stats.base_p_subevoked_p_R(m_units),'omitnan')],'-','Color',[0 174 239]./255,'LineWidth',6)
+        plot(x_start(mm) + [-0.5,2.5],[median(stats.base_p_subevoked_p_R(m_units & session_numbers_unique),'omitnan'),median(stats.base_p_subevoked_p_R(m_units & session_numbers_unique),'omitnan')],'-','Color',[0 174 239]./255,'LineWidth',6)
     else
-        plot(x_start(mm) + [-0.5,2.5],[median(stats.base_p_subevoked_p_R(m_units),'omitnan'),median(stats.base_p_subevoked_p_R(m_units),'omitnan')],'-','Color',[0 174 239]./255,'LineWidth',3)
+        plot(x_start(mm) + [-0.5,2.5],[median(stats.base_p_subevoked_p_R(m_units & session_numbers_unique),'omitnan'),median(stats.base_p_subevoked_p_R(m_units & session_numbers_unique),'omitnan')],'-','Color',[0 174 239]./255,'LineWidth',3)
     end
 
     % Baseline FR vs Evoked FR
