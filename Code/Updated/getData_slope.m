@@ -116,9 +116,13 @@ if collect_data
                         bi = round(beep_time);
                         pd = siteData{2}(Fbeep(bb),:,4); % 4=val, 5=slope
                         baseline = mean(pd(bi+pupil_baseline_times),'omitnan');
-                        % evoked = mean(pd(bi+pupil_evoked_times),'omitnan');
-                        evoked = max(nanrunmean(pd(bi+pupil_evoked_times),50));
-                        pupil_data(bb,:) = [baseline, evoked-baseline];
+                        pd = siteData{2}(Fbeep(bb),:,5); % 4=val, 5=slope
+                        % evoked = nanmean(nanrunmean(pd(bi+pupil_evoked_times),50));
+                        evoked_mm = [nanmin(pd(bi+pupil_evoked_times)),...
+                            nanmax(pd(bi+pupil_evoked_times))];
+                        [~,evoked_i] = max(abs(evoked_mm));
+                        evoked = evoked_mm(evoked_i);
+                        pupil_data(bb,:) = [baseline, evoked];
                         fix_start_times(bb) = siteData{1}(Fbeep(bb),1);
 
                         % Get spike data per unit
@@ -212,7 +216,7 @@ if collect_data
                             'spike_baseline', 'fix_global_start_time',...
                             'pupil_drift_residuals', 'spike_drift_residuals'};
                         
-                        stats(ith_unit) = unitSummaryPlot(LC_Beep_data(LC_Beep_data(:,3)==ith_unit,:), LC_Fix_data(LC_Fix_data(:,3)==ith_unit,:));
+                        stats(ith_unit) = unitSummaryPlot_slope(LC_Beep_data(LC_Beep_data(:,3)==ith_unit,:), LC_Fix_data(LC_Fix_data(:,3)==ith_unit,:));
                         
                         %% Save the figure?
                         if save_figs
