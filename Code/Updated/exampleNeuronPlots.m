@@ -12,8 +12,14 @@ example_neurons = [1, 18, 24;...
     % 1, 21, 27;...
     % 2, 35, 77;...
     % 2, 39, 80
-figure;
+f = figure; f.Position = [828 1 685 865];
+t = tiledlayout(6,size(example_neurons,1),'TileSpacing','tight','Padding','compact');
+n_rows = 6;
+n_cols = size(example_neurons,1);
+tile_index = @(r,c) (r - 1) * n_cols + c;
+
 for ex = 1:size(example_neurons,1)
+    temp_stats = [];
     temp_beep_data = LC_Beep_data(LC_Beep_data(:,3)==example_neurons(ex,3),:);
     temp_fix_data = LC_Fix_data(LC_Fix_data(:,3)==example_neurons(ex,3),:);
 
@@ -35,15 +41,16 @@ for ex = 1:size(example_neurons,1)
     sub_FR_evoked = temp_beep_data(:,7); % Baseline subtraction
 
     % Create a table for using linear models
-    lm_table = table(pupil_drift.Residuals.Raw(1:size(temp_beep_data,1)), spike_drift.Residuals.Raw(1:size(temp_beep_data,1)), sub_p_evoked, sub_FR_evoked,...
-        'VariableNames',{'pupil_base', 'spike_base', 'pupil_evoked', 'spike_evoked'});
+    lm_table = table(pupil_drift.Residuals.Raw(1:size(temp_beep_data,1)), spike_drift.Residuals.Raw(1:size(temp_beep_data,1)), sub_p_evoked, sub_FR_evoked, raw_p_evoked, raw_FR_evoked,...
+        'VariableNames',{'pupil_base', 'spike_base', 'pupil_evoked', 'spike_evoked', 'pupil_evoked_raw', 'spike_evoked_raw'});
 
     %% 1) Is baseline pupil related to baseline FR?
     % rho = partialcorr(x,y,z) returns the sample linear partial correlation coefficients between pairs of variables in x and y, controlling for the variables in z.
     % [base_p_base_FR(ith_unit), p(ith_unit)] = partialcorr(spike_rate_data(Lg,1,uu),pupil_data(Lg,1),[trial_times(Lg)]','Type','Spearman');
     [temp_stats.base_p_base_FR, temp_stats.p] = partialcorr(all_baseline_FR',all_baseline_pd', all_trial_times','Type','Spearman');
-
-    subplot(6,size(example_neurons,1),ex); hold off;
+    
+    nexttile(ex); hold off;
+    % subplot(6,size(example_neurons,1),ex); hold off;
     plot(pupil_drift.Residuals.Raw,spike_drift.Residuals.Raw,'ok','MarkerFaceColor',[0.5 0.5 0.5])
     lm = fitlm(pupil_drift.Residuals.Raw, spike_drift.Residuals.Raw);
     h=plot(lm); hold on;
@@ -52,12 +59,16 @@ for ex = 1:size(example_neurons,1)
     h(3).Color = 'k';
     h(4).Color = 'k';
     if ex == 3
-        xlabel({'Baseline Pupil (Residuals)'})
+        xlabel({'Baseline Pupil (residuals)'})
+    else
+        xlabel('');
     end
     if ex == 1
-        ylabel({'Baseline FR', '(Residuals)'})
+        ylabel({'Baseline FR', '(residuals)'})
+    else
+        ylabel('');
     end
-    axis square;
+    pbaspect([1 1 1]);
     legend off;
 
 
@@ -75,7 +86,8 @@ for ex = 1:size(example_neurons,1)
     temp_stats.pEvoked_v_pBase_LLR = results.LogLik(1)./results.LogLik(2);
     lm2 = fitlm(pupil_drift.Residuals.Raw(1:size(temp_beep_data,1)),sub_p_evoked, 'purequadratic');
 
-    subplot(6,size(example_neurons,1),ex + size(example_neurons,1)); hold off;
+    % subplot(6,size(example_neurons,1),ex + size(example_neurons,1)); hold off;
+    nexttile(ex + size(example_neurons,1)); hold off;
     h=plot(lm); hold on;
     % h(1).Marker = 'none';
     h(2).Color = 'b';
@@ -90,11 +102,15 @@ for ex = 1:size(example_neurons,1)
     % plot(pupil_drift.Residuals.Raw, sub_p_evoked,'o')
     if ex == 3
         xlabel('Baseline Pupil (residuals)')
+    else
+        xlabel('');
     end
     if ex == 1
-        ylabel('Evoked Pupil: baselne subtracted')
+        ylabel({'Evoked Pupil', '(baselne subtracted)'})
+    else
+        ylabel('');
     end
-    axis square;
+    pbaspect([1 1 1]);
     legend off;
     
 
@@ -112,7 +128,8 @@ for ex = 1:size(example_neurons,1)
         temp_stats.sEvoked_v_sBase = NaN;
         temp_stats.sEvoked_v_sBase_LLR = NaN;
     end
-    subplot(6,size(example_neurons,1),ex + 2*size(example_neurons,1));
+    % subplot(6,size(example_neurons,1),ex + 2*size(example_neurons,1));
+    nexttile(ex + 2*size(example_neurons,1));
     hold off;
     h=plot(lm); hold on;
     % h(1).Marker = 'none';
@@ -130,15 +147,20 @@ for ex = 1:size(example_neurons,1)
     % plot(spike_drift.Residuals.Raw,sub_FR_evoked,'o')
     if ex == 3
         xlabel('Baseline FR (residuals)')
+    else
+        xlabel('');
     end
     if ex == 1
-        ylabel('Evoked FR: baselne subtracted')
+        ylabel({'Evoked FR', '(baselne subtracted)'})
+    else
+        ylabel('');
     end
-    axis square;
+    pbaspect([1 1 1]);
     legend off;
 
     %% 4) Is evoked pupil related to evoked FR?
-    subplot(6,size(example_neurons,1),ex + 3*size(example_neurons,1)); hold off;
+    % subplot(6,size(example_neurons,1),ex + 3*size(example_neurons,1)); hold off;
+    nexttile(ex + 3*size(example_neurons,1)); hold off;
     plot(sub_p_evoked,sub_FR_evoked,'ok','MarkerFaceColor',[0.5 0.5 0.5])
     lm = fitlm(sub_p_evoked, sub_FR_evoked);
     h=plot(lm); hold on;
@@ -147,12 +169,16 @@ for ex = 1:size(example_neurons,1)
     h(3).Color = 'k';
     h(4).Color = 'k';
     if ex == 3
-        xlabel({'Evoked Pupil', '(baseline subtracted)'})
+        xlabel({'Evoked Pupil (baseline subtracted)'})
+    else
+        xlabel('');
     end
     if ex==1
         ylabel({'Evoked FR', '(baseline subtracted)'})
+    else
+        ylabel('');
     end
-    axis square;
+    pbaspect([1 1 1]);
     legend off;
     
     % Joshi:
@@ -190,7 +216,8 @@ for ex = 1:size(example_neurons,1)
         temp_stats.sEvoked_v_pBase = NaN;
         temp_stats.sEvoked_v_pBase_LLR = NaN;
     end
-    subplot(6,size(example_neurons,1),ex + 4*size(example_neurons,1)); hold off;
+    % subplot(6,size(example_neurons,1),ex + 4*size(example_neurons,1)); hold off;
+    nexttile(ex + 4*size(example_neurons,1));
     hold off;
     h=plot(lm); hold on;
     % h(1).Marker = 'none';
@@ -208,11 +235,15 @@ for ex = 1:size(example_neurons,1)
     % plot(pupil_drift.Residuals.Raw,sub_FR_evoked,'o')
     if ex == 3
         xlabel('Baseline Pupil (residuals)')
+    else
+        xlabel('');
     end
     if ex == 1
-        ylabel('Evoked FR: baselne subtracted')
+        ylabel({'Evoked FR', '(baselne subtracted)'})
+    else
+        ylabel('');
     end
-    axis square;
+    pbaspect([1 1 1]);
     legend off;
 
     % Spearman%s partial correlation, r,
@@ -242,7 +273,8 @@ for ex = 1:size(example_neurons,1)
     end
     av = anova(lm2);
     temp_stats.subevoked_p_base_FR_lm2 = av.pValue(:,1);
-    subplot(6,size(example_neurons,1),ex + 5*size(example_neurons,1)); hold off;
+    % subplot(6,size(example_neurons,1),ex + 5*size(example_neurons,1)); hold off;
+    nexttile(ex + 5*size(example_neurons,1)); hold off;
     h=plot(lm); hold on;
     % h(1).Marker = 'none';
     h(2).Color = 'k';
@@ -258,12 +290,16 @@ for ex = 1:size(example_neurons,1)
     % subplot(2,5,10);
     % plot(sub_p_evoked,spike_drift.Residuals.Raw,'o')
     if ex == 3
-        xlabel('Evoked Pupil: baselne subtracted')
+        xlabel('Evoked Pupil (baselne subtracted)')
+    else
+        xlabel('');
     end
     if ex==1
-        ylabel('Baseline FR (residuals)')
+        ylabel({'Baseline FR', '(residuals)'})
+    else
+        ylabel('');
     end
-    axis square;
+    pbaspect([1 1 1]);
     legend off;
 
     % baseline FR, raw evoked pupil, baseline pupil

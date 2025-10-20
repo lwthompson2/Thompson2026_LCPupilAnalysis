@@ -10,42 +10,105 @@
 valid = isfinite(stats.subevoked_p_base_FR_R) & isfinite(stats.base_FR_subevoked_FR_R);
 
 figure; hold on;
-subplot(1,4,1);
-plot(stats.base_p_subevoked_p_R(valid), stats.mean_pupil_evoked_mag(valid), 'ok','MarkerFaceColor','k')
+subplot(2,4,1);
+plot(stats.mean_pupil_evoked_mag(valid & logical(session_numbers_unique')), stats.base_p_subevoked_p_R(valid & logical(session_numbers_unique')), 'ok','MarkerFaceColor','w')
 lsline;
 title('Pupil-Pupil')
-xlabel('R')
-ylabel('mean evoked pupil')
-[R,P] = corr(stats.base_p_subevoked_p_R(valid), stats.mean_pupil_evoked_mag(valid), 'type', 'Spearman')
+ylabel('R')
+xlabel('mean evoked pupil')
+[R,P] = corr(stats.mean_pupil_evoked_mag(valid & logical(session_numbers_unique')), stats.base_p_subevoked_p_R(valid & logical(session_numbers_unique')), 'type', 'Spearman')
 axis square;
-xlim([-1 1]);
+ylim([-1 1]);
 
-subplot(1,4,2);
-plot(stats.base_FR_subevoked_FR_R(valid), stats.mean_spike_evoked_mag(valid), 'ok','MarkerFaceColor','k')
+subplot(2,4,2);
+plot(stats.mean_spike_evoked_mag(valid), stats.base_FR_subevoked_FR_R(valid), 'ok','MarkerFaceColor','w')
 lsline
 title('Base FR Evoked FR')
-xlabel('R')
-ylabel('mean evoked FR')
-[R,P] = corr(stats.base_FR_subevoked_FR_R(valid), stats.mean_spike_evoked_mag(valid), 'type', 'Spearman')
+ylabel('R')
+xlabel('mean evoked FR')
+[R,P] = corr(stats.mean_spike_evoked_mag(valid), stats.base_FR_subevoked_FR_R(valid), 'type', 'Spearman')
 axis square;
-xlim([-1 1]);
+ylim([-1 1]);
 
-subplot(1,4,3);
-plot(stats.base_p_subevoked_FR_R(valid), stats.mean_spike_evoked_mag(valid), 'ok','MarkerFaceColor','k')
+subplot(2,4,3);
+plot(stats.mean_spike_evoked_mag(valid), stats.base_p_subevoked_FR_R(valid), 'ok','MarkerFaceColor','w')
 lsline
 title('Base Pupil Evoked FR')
-xlabel('R')
-ylabel('mean evoked FR')
-[R,P] = corr(stats.base_p_subevoked_FR_R(valid), stats.mean_spike_evoked_mag(valid), 'type', 'Spearman')
+ylabel('R')
+xlabel('mean evoked FR')
+[R,P] = corr(stats.mean_spike_evoked_mag(valid), stats.base_p_subevoked_FR_R(valid), 'type', 'Spearman')
 axis square;
-xlim([-1 1]);
+ylim([-1 1]);
 
-subplot(1,4,4);
-plot(stats.subevoked_p_base_FR_R(valid), stats.mean_pupil_evoked_mag(valid), 'ok','MarkerFaceColor','k')
+subplot(2,4,4);
+plot(stats.mean_pupil_evoked_mag(valid), stats.subevoked_p_base_FR_R(valid), 'ok','MarkerFaceColor','w')
 lsline
 title('Base FR Evoked Pupil')
-xlabel('R')
-ylabel('mean evoked pupil')
-[R,P] = corr(stats.subevoked_p_base_FR_R(valid), stats.mean_pupil_evoked_mag(valid), 'type', 'Spearman')
+ylabel('R')
+xlabel('mean evoked pupil')
+[R,P] = corr(stats.mean_pupil_evoked_mag(valid), stats.subevoked_p_base_FR_R(valid), 'type', 'Spearman')
 axis square;
-xlim([-1 1]);
+ylim([-1 1]);
+
+% Second row looks at range
+subplot(2,4,5);
+plot(stats.range_pupil_evoked_mag(valid & logical(session_numbers_unique')), stats.base_p_subevoked_p_R(valid & logical(session_numbers_unique')), 'ok','MarkerFaceColor','w')
+lsline;
+title('Pupil-Pupil')
+ylabel('R')
+xlabel('range evoked pupil')
+[R,P] = corr(stats.range_pupil_evoked_mag(valid & logical(session_numbers_unique')), stats.base_p_subevoked_p_R(valid & logical(session_numbers_unique')), 'type', 'Spearman')
+axis square;
+ylim([-1 1]);
+
+subplot(2,4,6);
+plot(stats.range_spike_evoked_mag(valid), stats.base_FR_subevoked_FR_R(valid), 'ok','MarkerFaceColor','w')
+lsline
+title('Base FR Evoked FR')
+ylabel('R')
+xlabel('range evoked FR')
+[R,P] = corr(stats.range_spike_evoked_mag(valid), stats.base_FR_subevoked_FR_R(valid), 'type', 'Spearman')
+axis square;
+ylim([-1 1]);
+
+subplot(2,4,7);
+plot(stats.range_spike_evoked_mag(valid), stats.base_p_subevoked_FR_R(valid), 'ok','MarkerFaceColor','w')
+lsline
+title('Base Pupil Evoked FR')
+ylabel('R')
+xlabel('range evoked FR')
+[R,P] = corr(stats.range_spike_evoked_mag(valid), stats.base_p_subevoked_FR_R(valid), 'type', 'Spearman')
+axis square;
+ylim([-1 1]);
+
+subplot(2,4,8);
+plot(stats.range_pupil_evoked_mag(valid), stats.subevoked_p_base_FR_R(valid), 'ok','MarkerFaceColor','w')
+lsline
+title('Base FR Evoked Pupil')
+ylabel('R')
+xlabel('range evoked pupil')
+[R,P] = corr(stats.range_pupil_evoked_mag(valid), stats.subevoked_p_base_FR_R(valid), 'type', 'Spearman')
+axis square;
+ylim([-1 1]);
+
+%% Does the LLR correlate with range?
+figure; hold on;
+subplot(2,4,1); hold on;
+plot(stats.range_pupil_evoked_mag(valid), stats.pEvoked_v_sBase_LLR(valid), 'ok','MarkerFaceColor','w')
+lsline
+title('Evoked Pupil v Base FR');
+ylabel('LLR');
+xlabel('Evoked Pupil Range');
+axis square;
+
+subplot(2,4,5); hold on;
+plot(stats.range_spike_baseline(valid), stats.pEvoked_v_sBase_LLR(valid), 'ok','MarkerFaceColor','w')
+lsline
+title('Evoked Pupil v Base FR');
+ylabel('LLR');
+xlabel('Baseline Spike Range');
+axis square;
+
+% Does the LLR correlate with magnitude
+% Do the "inverse" cross measure comparisons correlate with range?
+% Do the "inverse" cross measure comparisons correlate with magnitude?

@@ -7,7 +7,7 @@
 %   is at the bottom of this file
 
 clear all
-close all
+% close all
 
 % Flag
 collect_data = true;

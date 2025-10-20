@@ -1,6 +1,6 @@
-% Script for getting & plotting 
+% Script for getting & plotting
 %   LC & pupil baseline/evoked relationships
-%   
+%
 % Data are "cleaned" versions of FIRA from Sidd's 2016 LC-pupil paper
 %   created by cleanLCP_FIRA.m
 %   The data are in cell arrays called "siteData", descrption
@@ -23,8 +23,8 @@ pup_pup_folders = {'None','Positive','Negative'};
 % time bins (all wrt beep onset)
 times = [ ...
     -100    0;      % pupil basel10ine
-    0       900;    % pupil evoked
-    -500    0;      % spikes baseline
+    0       800;    % pupil evoked
+    -400    0;      % spikes baseline
     0       200];   % spikes evoked
 
 pupil_baseline_times = times(1,1):times(1,2);
@@ -64,7 +64,7 @@ if collect_data
                     monkeys{mm}, ff, length(fnames)))
                 load(fullfile(base_dir, fnames{ff}));
                 unique_session = 1;
-                
+
                 %  siteData{1}: trialsxcols matrix, cols are:
                 %   1 ... fix start time wrt fixation on
                 %   2 ... fix end time wrt fix start time (fix duration)
@@ -79,14 +79,14 @@ if collect_data
                 % "Evoked" response is from correct beep trials, single-units only
                 Fbeep = find(siteData{1}(:,3)==1 & ...
                     siteData{1}(:,4)>abs(min(times(:,1))) & ... % beep times greater than min before times (sufficient time before beep)
-                    siteData{1}(:,4)<size(siteData{2},2)-max(times(:,2))); 
+                    siteData{1}(:,4)<size(siteData{2},2)-max(times(:,2)));
                 Ffix = find(siteData{1}(:,3)==1 & ... % correct
                     isnan(siteData{1}(:,4)) & ... % not a beep trial
                     isnan(siteData{1}(:,9))); % not a stim trial
                 num_single_units = size(siteData{3}, 2)-1;
 
                 if ~isempty(Fbeep) && ~isempty(Ffix) && num_single_units > 0
-                    
+
                     num_beep_trials = size(Fbeep,1);
                     num_fix_trials = size(Ffix,1);
                     num_pupil_samples = size(siteData{2},2);
@@ -104,32 +104,69 @@ if collect_data
                     spike_fix_data = nan(num_fix_trials, num_single_units);
                     spike_rate_fix_data = nan(num_fix_trials, num_single_units);
                     trial_fix_times = [];
-
-                    
+                    raw_beep_pd = [];
+                    raw_beep_sp = [];
+                    all_beep_times = [];
+                    baseline_times = [];
                     % Loop through the trials with beeps
                     for bb = 1:num_beep_trials
 
                         % Encode with respect to beep time
                         beep_time = siteData{1}(Fbeep(bb),4);
+                        all_beep_times(bb) = beep_time;
+                        min_ind = floor(min(siteData{1}(Fbeep(:),4)))-1;
+                        min_ind = min(min_ind,1000);
                         trial_times(bb) = siteData{1}(Fbeep(bb),7);
+                        fix_start_times(bb) = siteData{1}(Fbeep(bb),1);
                         % Get pupil data
-                        bi = round(beep_time);
+                        bi = round(beep_time) + 1; % time 0 = index 1
                         pd = siteData{2}(Fbeep(bb),:,4); % 4=val, 5=slope
-                        baseline = mean(pd(bi+pupil_baseline_times),'omitnan');
+                        % raw_beep_pd(bb,:) = pd(bi-min_ind:bi+min_ind);
+                        
+                        % New from fix on to beep on.
+                        % Something is clearly wrong since some fix start
+                        % times are before/after beep on time.
+                        baseline = mean(pd(1:bi),'omitnan');
+                        % Old
+                        % baseline = mean(pd(bi+pupil_baseline_times),'omitnan');
+                        
                         % evoked = mean(pd(bi+pupil_evoked_times),'omitnan');
                         evoked = max(nanrunmean(pd(bi+pupil_evoked_times),50));
                         pupil_data(bb,:) = [baseline, evoked-baseline];
-                        fix_start_times(bb) = siteData{1}(Fbeep(bb),1);
 
                         % Get spike data per unit
                         for uu = 1:num_single_units
                             sp = siteData{3}{Fbeep(bb), uu+1};
-                            baseline = sum(sp>=beep_time+times(3,1) & ...
-                               sp<=beep_time+times(3,2));
+                            % raw_beep_sp(uu,bb,:) = [sp(sp>=beep_time+times(3,1) & ...
+                            %    sp<=beep_time+times(3,2)),...
+                            %    sp(sp>=beep_time+times(4,1) & ...
+                            %    sp<=beep_time+times(4,2))];
+
+                            % New using entire fix period
+                            baseline = sum(sp>=0 & ...
+                                sp<beep_time+times(3,2));
+                            baseline_times(bb,uu) = beep_time;
+                            % Old using only small window
+                            % baseline = sum(sp>=beep_time+times(3,1) & ...
+                            %     sp<=beep_time+times(3,2));
+
                             evoked = sum(sp>=beep_time+times(4,1) & ...
-                               sp<=beep_time+times(4,2));
+                                sp<=beep_time+times(4,2));
                             spike_data(bb,:,uu) = [baseline, evoked];
-                            
+                            if ~isempty(sp)
+                                subplot(num_single_units,1,uu);
+                                if bb == 1
+                                    hold off;
+                                else
+                                    hold on;
+                                end
+                                plot(sp-beep_time,bb/10,'.k');
+                                if bb==num_beep_trials
+                                    xline(0,'--');
+                                    xlim([-1000,1000]);
+                                end
+                                % end
+                            end
                         end
                     end
 
@@ -137,22 +174,22 @@ if collect_data
                     for bb = 1:num_fix_trials
 
                         % Encode with respect to fix on time
-                        start_time = siteData{1}(Ffix(bb),1);
+                        start_time = siteData{1}(Ffix(bb),1); % This is irrelevant
                         end_time = siteData{1}(Ffix(bb),2);
-                        fix_times = 0:(end_time - start_time);
+                        fix_times = 0:round(end_time);
                         trial_fix_times(bb) = siteData{1}(Ffix(bb),7);
                         % Get pupil data
-                        bi = round(start_time);
+                        % bi = round(start_time) + 1; % time 0 = index 1
                         pd = siteData{2}(Ffix(bb),:,4); % 4=val, 5=slope
-                        baseline = mean(pd(bi+fix_times),'omitnan');
+                        baseline = mean(pd(1+fix_times),'omitnan'); % Assuming index 1 is the fix start time...
                         pupil_fix_data(bb,:) = baseline;
                         % Get spike data per unit
                         for uu = 1:num_single_units
                             sp = siteData{3}{Ffix(bb), uu+1};
-                            baseline = sum(sp>=start_time & ...
-                                sp<=end_time);
+                            baseline = sum(sp>=0 & ...
+                                sp<=end_time); % greater than 0 assuming spike times are relative to fp acquired (start time)
                             spike_fix_data(bb,uu) = baseline;
-                            spike_rate_fix_data(bb,uu) = baseline./(end_time-start_time).*1000;
+                            spike_rate_fix_data(bb,uu) = baseline./end_time.*1000;
                         end
                     end
 
@@ -162,15 +199,19 @@ if collect_data
                         if uu >1
                             unique_session = 0;
                         end
-                        
+
                         % Relationships for each neuron
                         ith_unit = ith_unit + 1;
                         session_numbers_unique(ith_unit) = unique_session;
+                        % baseline
+                        % spike_rate_data(:,1,uu) = spike_data(:,1,uu)./ ...
+                        %     diff(times(3,:)).*1000;
                         spike_rate_data(:,1,uu) = spike_data(:,1,uu)./ ...
-                            diff(times(3,:)).*1000;
+                            baseline_times(:,uu).*1000;
+                        % evoked
                         spike_rate_data(:,2,uu) = spike_data(:,2,uu)./ ...
                             diff(times(4,:)).*1000;
-                        
+
                         Lg = isfinite(spike_rate_data(:,1,uu)) & isfinite(pupil_data(:,1)) & isfinite(pupil_data(:,2)) & zscore(spike_rate_data(:,2,uu))<8;
                         Lg_fix = isfinite(spike_rate_fix_data(:,uu)) & isfinite(pupil_fix_data);
                         if do_zscore
@@ -181,11 +222,11 @@ if collect_data
                             spike_rate_data(Lg,2,uu) = all_zFR(sum(Lg)+(1:sum(Lg)));
                             spike_rate_fix_data(Lg_fix,uu) = all_zFR((2*sum(Lg))+1:end);
                         end
-                        
+
                         spike_rate_data(:,2,uu) = spike_rate_data(:,2,uu) - spike_rate_data(:,1,uu); % evoked - baseline
                         session_numbers(ith_unit) = ff; % pupil vs pupil data need to know which units belong to the same session
                         monkey_numbers(ith_unit) = mm;
-                        
+
                         % Calculate a global drift over time and extract
                         % residuals
                         all_trial_times = [trial_times(Lg), trial_fix_times(Lg_fix)];
@@ -193,43 +234,33 @@ if collect_data
                         all_baseline_FR = [squeeze(spike_rate_data(Lg,1,uu))', squeeze(spike_rate_fix_data(Lg_fix,uu))'];
                         spike_drift = fitlm(all_trial_times,all_baseline_FR);
                         pupil_drift = fitlm(all_trial_times,all_baseline_pd);
-                        
+
                         % Beep trials only for simplified data
                         LC_Beep_data = cat(1, LC_Beep_data, ...
                             [repmat([mm unique_session ith_unit],sum(Lg),1), ...
                             pupil_data(Lg,:) squeeze(spike_rate_data(Lg,1,uu)) squeeze(spike_rate_data(Lg,2,uu)) trial_times(Lg)'...
-                            pupil_drift.Residuals.Raw(1:sum(Lg)) spike_drift.Residuals.Raw(1:sum(Lg))]);
-                        LC_Beep_labels = {'monkey_id','session_id', 'unit_id', 'pupil_baseline', 'pupil_bs_evoked',...
+                            pupil_drift.Residuals.Raw(1:sum(Lg)) spike_drift.Residuals.Raw(1:sum(Lg))...
+                            pupil_data(Lg,1)+pupil_data(Lg,2) squeeze(spike_rate_data(Lg,1,uu))+squeeze(spike_rate_data(Lg,2,uu))]);
+                        LC_Beep_labels = {'monkey_id','session_unique', 'unit_id',...
+                            'pupil_baseline', 'pupil_bs_evoked',...
                             'spike_baseline', 'spike_bs_evoked', 'fix_global_start_time',...
-                            'pupil_drift_residuals', 'spike_drift_residuals'};
+                            'pupil_drift_residuals', 'spike_drift_residuals',...
+                            'raw_pupil_evoked', 'raw_spike_evoked'};
 
                         % Fix trials only for simplified data
                         LC_Fix_data = cat(1, LC_Fix_data, ...
                             [repmat([mm unique_session ith_unit],sum(Lg_fix),1), ...
                             pupil_fix_data(Lg_fix,:) squeeze(spike_rate_fix_data(Lg_fix,uu)) trial_fix_times(Lg_fix)'...
                             pupil_drift.Residuals.Raw(sum(Lg)+1:end) spike_drift.Residuals.Raw(sum(Lg)+1:end)]);
-                        LC_Fix_labels = {'monkey_id','session_id', 'unit_id', 'pupil_baseline',...
+                        LC_Fix_labels = {'monkey_id','session_unique', 'unit_id', 'pupil_baseline',...
                             'spike_baseline', 'fix_global_start_time',...
                             'pupil_drift_residuals', 'spike_drift_residuals'};
-                        
-                        stats(ith_unit) = unitSummaryPlot(LC_Beep_data(LC_Beep_data(:,3)==ith_unit,:), LC_Fix_data(LC_Fix_data(:,3)==ith_unit,:));
-                        
-                        %% Save the figure?
-                        if save_figs
-                            if stats(ith_unit).p <0.05
-                                h=gcf;
-                                set(h,'PaperOrientation','landscape');
-                                set(h,'PaperUnits','normalized');
-                                set(h,'PaperPosition', [0 0 1 1]);
-                                if do_zscore
-                                    name = ['/Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis/Fits/Z_scored/',monkeys{mm},'/',extractBefore(fnames{ff},'.'),'_',num2str(ith_unit),'.pdf'];
-                                else
-                                    name = ['/Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis/Fits/',monkeys{mm},'/', extractBefore(fnames{ff},'.'),'_',num2str(ith_unit),'.pdf'];
-                                end
-                                saveas(h,name)
-                            end
-                        end
+
+
                     end
+                else
+                    disp(sprintf('monkey = %s, %d/%d file has no neurons', ...
+                    monkeys{mm}, ff, length(fnames)))
                 end
             end
         end
@@ -242,8 +273,8 @@ else
     % load data from file
     % LC_PD_data = FS_loadProjectFile('2016_LCPupil', 'pdBeep');
 end
-stats = struct2table(stats);
-
+LC_Beep_table = array2table(LC_Beep_data, 'VariableNames', LC_Beep_labels);
+LC_Fix_table = array2table(LC_Fix_data, 'VariableNames', LC_Fix_labels);
 %% Original cleaning script notes:
 
 % Cleans up and saves siteData (in file "clean_name"):

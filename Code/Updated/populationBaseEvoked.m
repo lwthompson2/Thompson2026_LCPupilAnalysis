@@ -1,5 +1,6 @@
 %% Generates a population summary plot for Joshi 2016 data
 % Created by LWT 9/24/2024
+% FIRST USE getData and set do_zscore to true!!!
 
 % 1) Is baseline pupil related to baseline FR?
 % 2) Is baseline pupil related to evoked pupil?

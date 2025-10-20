@@ -1,8 +1,9 @@
-function stats = unitSummaryPlot(LC_Beep_data, LC_Fix_data)
-%% Generates a unit summary plot for Joshi 2016 data
+function stats = unitSummaryPlot(LC_Beep_table, LC_Fix_table)
+%% Generates a unit summary plot for Joshi 2016 data and gets relevant statistics
 % Created by LWT 9/24/2024
 
 % Input:
+% UPDATED TO USE TABLES WITH THE SAME DATA/LABELS MENTIONED BELOW.
 % The two matrices LC_Beep_data and LC_Fix_data for a SINGLE UNIT (getData.m)
 % Iterative process copied below (concatenating matrices for each unit - hence the repmat for labels):
 % For trials with beeps (and therefore evoked data):
@@ -32,32 +33,30 @@ function stats = unitSummaryPlot(LC_Beep_data, LC_Fix_data)
 % For each session evoked vs baseline
 % Fit a line vs a quadratic to see if there is a relationship
 
-all_trial_times = [LC_Beep_data(:,8)', LC_Fix_data(:,6)'];
-all_baseline_pd = [LC_Beep_data(:,4)', LC_Fix_data(:,4)'];
-all_baseline_FR = [LC_Beep_data(:,6)', LC_Fix_data(:,5)'];
-spike_drift = fitlm(all_trial_times,all_baseline_FR);
-pupil_drift = fitlm(all_trial_times,all_baseline_pd);
+stats.monkey_id = LC_Beep_table.monkey_id(1);
+
+all_trial_times = [LC_Beep_table.fix_global_start_time', LC_Fix_table.fix_global_start_time'];
+all_baseline_pd = [LC_Beep_table.pupil_baseline', LC_Fix_table.pupil_baseline'];
+all_baseline_FR = [LC_Beep_table.spike_baseline', LC_Fix_table.spike_baseline'];
+spike_drift = fitlm(all_trial_times,all_baseline_FR); % already in table but no stats
+pupil_drift = fitlm(all_trial_times,all_baseline_pd); % already in table but no stats
+
+% Get drift coefficients
 stats.spike_drift_slope = spike_drift.Coefficients.Estimate(2);
 stats.pupil_drift_slope = pupil_drift.Coefficients.Estimate(2);
+% Correlate the residuals (similar to the baseline_p that uses a partial
+% correlation.
 stats.baseline_P_alt = corr(spike_drift.Residuals.Raw, pupil_drift.Residuals.Raw, 'type', 'Spearman');
 
-raw_p_evoked = LC_Beep_data(:,4)+LC_Beep_data(:,5); % Add back baseline to evoked
-corrected_p_evoked = raw_p_evoked - pupil_drift.Fitted(1:size(LC_Beep_data,1)); % Residual %raw_p_evoked + (trial_times(Lg)'.*pupil_drift.Coefficients.Estimate(2)); % Consider the slope associated with time drift
-sub_p_evoked = LC_Beep_data(:,5);
-
-raw_FR_evoked = LC_Beep_data(:,6)+LC_Beep_data(:,7); % Already subtracted, add back baseline
-corrected_FR_evoked = raw_FR_evoked - spike_drift.Fitted(1:size(LC_Beep_data,1)); % Residual raw_FR_evoked + (trial_times(Lg)'.*spike_drift.Coefficients.Estimate(2)); % Consider the slope associated with time drift
-sub_FR_evoked = LC_Beep_data(:,7); % Baseline subtraction
-
-% Create a table for using linear models
-lm_table = table(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)), spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)), sub_p_evoked, sub_FR_evoked,...
-    'VariableNames',{'pupil_base', 'spike_base', 'pupil_evoked', 'spike_evoked'});
+% Check for evoked activity
+stats.evoked_spikes = signtest(LC_Beep_table.spike_baseline, LC_Beep_table.spike_baseline+LC_Beep_table.spike_bs_evoked);
 
 %% 1) Is baseline pupil related to baseline FR?
 % rho = partialcorr(x,y,z) returns the sample linear partial correlation coefficients between pairs of variables in x and y, controlling for the variables in z.
-% [base_p_base_FR(ith_unit), p(ith_unit)] = partialcorr(spike_rate_data(Lg,1,uu),pupil_data(Lg,1),[trial_times(Lg)]','Type','Spearman');
+% [stats.base_p_base_FR, stats.p] = partialcorr(LC_Fix_table.spike_baseline,LC_Fix_table.pupil_baseline,LC_Fix_table.fix_global_start_time,'Type','Spearman');
 [stats.base_p_base_FR, stats.p] = partialcorr(all_baseline_FR',all_baseline_pd', all_trial_times','Type','Spearman');
 
+% Plot baseline firing rate over time with drift estimate
 subplot(3,4,[1,2]); hold off;
 plot(all_trial_times./1000,all_baseline_FR,'ok','MarkerFaceColor','r');  hold on;
 j = lsline;
@@ -68,16 +67,23 @@ title('Baseline FR Drift')
 box off;
 % axis square;
 
+% Plot baseline pupil over time with drift estimate
 subplot(3,4,[3,4]); hold off;
-plot(all_trial_times./1000,all_baseline_pd,'ok','MarkerFaceColor','b');
+plot(all_trial_times./1000,all_baseline_pd,'ok','MarkerFaceColor','b'); hold on;
 j = lsline;
 j.Color = 'b';
+if LC_Beep_table.unit_id==25
+    sample_time = LC_Beep_table.fix_global_start_time(13)/1000;
+    sample_baseline_pd = LC_Beep_table.pupil_baseline(13);
+    plot(sample_time,sample_baseline_pd,'og','MarkerFaceColor','b')
+end
 xlabel('Time (sec)')
 ylabel('Baseline Pupil Diameter (Z-Score)')
 title('Baseline Pupil Drift')
 box off;
 % axis square;
 
+% Plot the relationship between the residuals
 subplot(3,4,5); hold off;
 plot(pupil_drift.Residuals.Raw,spike_drift.Residuals.Raw,'ok','MarkerFaceColor',[0.5 0.5 0.5])
 j = lsline;
@@ -94,92 +100,96 @@ axis square;
 
 %% 2) Is baseline pupil related to evoked pupil?
 
-%   a) raw evoked
-% base_p_evoked_p(ith_unit) = corr(pupil_drift.Residuals.Raw(1:sum(Lg)),corrected_p_evoked(1:sum(Lg)),'type','Spearman');
-% lm = fitlm(pupil_drift.Residuals.Raw(1:sum(Lg)),corrected_p_evoked, 'linear');
-% lm2 = fitlm(pupil_drift.Residuals.Raw(1:sum(Lg)),corrected_p_evoked, 'purequadratic');
-% subplot(2,5,4); hold off;
-% plot(lm); hold on;
-% h=plot(lm2); h(2).Color = 'g'; h(3).Color = 'g'; h(4).Color = 'g';
-% % plot(pupil_drift.Residuals.Raw,corrected_p_evoked,'o')
-% xlabel('Baseline Pupil (residuals)')
-% ylabel('Evoked Pupil (residuals)')
-% axis square;
-% legend off;
-[stats.base_p_subevoked_p_R, stats.base_p_subevoked_p] = corr(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_p_evoked,'type','Spearman');
+% Correlate pupil baseline residuals and baseline subtracted evoked
+[stats.base_p_subevoked_p_R, stats.base_p_subevoked_p] = corr(LC_Beep_table.pupil_drift_residuals,LC_Beep_table.pupil_bs_evoked,'type','Spearman');
 
-% We don't necessarily want to subtract
-%   b) baseline subtracted evoked
-lme = fitlme(lm_table,'pupil_evoked ~ pupil_base');
-lm = fitlm(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_p_evoked, 'linear');
-lme2 = fitlme(lm_table,'pupil_evoked ~ pupil_base*pupil_base');
+% Compare linear and quadratic models
+% For plotting purposes we use fitlm. For stats we use fitlme
+lm = fitlm(LC_Beep_table,'pupil_bs_evoked ~ pupil_drift_residuals');
+lm2 = fitlm(LC_Beep_table,'pupil_bs_evoked ~ pupil_drift_residuals*pupil_drift_residuals');
+lme = fitlme(LC_Beep_table,'pupil_bs_evoked ~ pupil_drift_residuals');
+lme2 = fitlme(LC_Beep_table,'pupil_bs_evoked ~ pupil_drift_residuals*pupil_drift_residuals');
 results = compare(lme,lme2);
 stats.pEvoked_v_pBase = results.pValue(2);
-stats.pEvoked_v_pBase_LLR = results.LogLik(1)./results.LogLik(2);
-lm2 = fitlm(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_p_evoked, 'purequadratic');
+stats.pEvoked_v_pBase_LLR = 2*(results.LogLik(2) - results.LogLik(1));
+% Plot the linear models
 subplot(3,4,9); hold off;
 h=plot(lm); hold on;
 h(1).Marker = 'none';
 h(2).Color = 'b';
 h(3).Color = 'b';
 h(4).Color = 'b';
-
 h=plot(lm2);
 h(1).Marker = 'o'; h(1).MarkerFaceColor = 'b'; h(1).MarkerEdgeColor = 'k';
 h(2).Color = 'g';
 h(3).Color = 'g';
 h(4).Color = 'g';
-% plot(pupil_drift.Residuals.Raw, sub_p_evoked,'o')
 xlabel('Baseline Pupil (residuals)')
 ylabel('Evoked Pupil: baselne subtracted')
 axis square;
 legend off;
 
-
 %% 3) Is baseline FR related to evoked FR?
-%   b) baseline subtracted evoked
-lm = fitlm(spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_FR_evoked, 'linear');
-lm2 = fitlm(spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_FR_evoked, 'purequadratic');
-if sum(lm_table.spike_base)>0
-    lme = fitlme(lm_table,'spike_evoked ~ spike_base');
-    lme2 = fitlme(lm_table,'spike_evoked ~ spike_base*spike_base');
+
+% Correlate spike baseline residuals and baseline subtracted evoked
+[stats.base_FR_subevoked_FR_R, stats.base_FR_subevoked_FR] = corr(LC_Beep_table.spike_drift_residuals, LC_Beep_table.spike_bs_evoked,'type','Spearman');
+
+% Use fitlm for plotting
+lm = fitlm(LC_Beep_table, 'spike_bs_evoked ~ spike_drift_residuals');
+lm2 = fitlm(LC_Beep_table, 'spike_bs_evoked ~ spike_drift_residuals*spike_drift_residuals');
+% To actually do this we need sufficient data
+if numel(unique(LC_Beep_table.spike_drift_residuals))>1
+    % Use lme for model comparison
+    lme = fitlme(LC_Beep_table, 'spike_bs_evoked ~ spike_drift_residuals');
+    lme2 = fitlme(LC_Beep_table, 'spike_bs_evoked ~ spike_drift_residuals*spike_drift_residuals');
     results = compare(lme,lme2);
     stats.sEvoked_v_sBase = results.pValue(2);
-    stats.sEvoked_v_sBase_LLR = results.LogLik(1)./results.LogLik(2);
+    stats.sEvoked_v_sBase_LLR = 2*(results.LogLik(2) - results.LogLik(1)); %results.LogLik(1)./results.LogLik(2);
 else
     stats.sEvoked_v_sBase = NaN;
     stats.sEvoked_v_sBase_LLR = NaN;
 end
+
+% Plot
 subplot(3,4,10); hold off;
 h=plot(lm); hold on;
 h(1).Marker = 'none';
 h(2).Color = 'r';
 h(3).Color = 'r';
 h(4).Color = 'r';
-
 h=plot(lm2);
 h(1).Marker = 'o'; h(1).MarkerFaceColor = 'r'; h(1).MarkerEdgeColor = 'k';
 h(2).Color = 'g';
 h(3).Color = 'g';
 h(4).Color = 'g';
-[stats.base_FR_subevoked_FR_R, stats.base_FR_subevoked_FR] = corr(spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)), sub_FR_evoked,'type','Spearman');
-% subplot(2,5,8);
-% plot(spike_drift.Residuals.Raw,sub_FR_evoked,'o')
 xlabel('Baseline FR (residuals)')
 ylabel('Evoked FR: baselne subtracted')
 axis square;
 legend off;
 
 %% 4) Is baseline pupil related to evoked FR?
-%   b) baseline subtracted evoked
-lm = fitlm(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_FR_evoked, 'linear');
-lm2 = fitlm(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_FR_evoked, 'purequadratic');
-if sum(lm_table.spike_base)>0
-    lme = fitlme(lm_table,'spike_evoked ~ pupil_base');
-    lme2 = fitlme(lm_table,'spike_evoked ~ pupil_base*pupil_base');
+
+[stats.base_p_subevoked_FR_R, stats.base_p_subevoked_FR] = corr(LC_Beep_table.pupil_drift_residuals, LC_Beep_table.spike_bs_evoked,'type','Spearman');
+
+% Spearman%s partial correlation, r, 
+% between spiking (spike rate, 0–200 ms following beep onset 
+% minus baseline spike rate measured during fixation prior to beep onset) 
+% and pupil (maximum change in pupil diameter 0–800 ms following beep 
+% onset) responses, accounting for the effects of baseline pupil diameter 
+% on both variables.
+[stats.partial_base_p_evoked_FR_r, stats.partial_base_p_evoked_FR_p] = partialcorr(LC_Beep_table.pupil_drift_residuals,... % baseline pupil
+    LC_Beep_table.spike_bs_evoked+LC_Beep_table.spike_baseline,... % raw evoked FR
+    LC_Beep_table.spike_baseline,'Type','Spearman'); % spike baseline  
+
+lm = fitlm(LC_Beep_table, 'spike_bs_evoked ~ pupil_drift_residuals');
+lm2 = fitlm(LC_Beep_table, 'spike_bs_evoked ~ pupil_drift_residuals*pupil_drift_residuals');
+
+if numel(unique(LC_Beep_table.spike_drift_residuals))>1
+    lme = fitlme(LC_Beep_table, 'spike_bs_evoked ~ pupil_drift_residuals');
+    lme2 = fitlme(LC_Beep_table, 'spike_bs_evoked ~ pupil_drift_residuals*pupil_drift_residuals');
     results = compare(lme,lme2);
     stats.sEvoked_v_pBase = results.pValue(2);
-    stats.sEvoked_v_pBase_LLR = results.LogLik(1)./results.LogLik(2);
+    stats.sEvoked_v_pBase_LLR = 2*(results.LogLik(2) - results.LogLik(1)); %results.LogLik(1)./results.LogLik(2);
 else
     stats.sEvoked_v_pBase = NaN;
     stats.sEvoked_v_pBase_LLR = NaN;
@@ -190,41 +200,32 @@ h(1).Marker = 'none';
 h(2).Color = 'k';
 h(3).Color = 'k';
 h(4).Color = 'k';
-
 h=plot(lm2);
 h(1).Marker = 'o'; h(1).MarkerFaceColor = [0.5 0.5 0.5]; h(1).MarkerEdgeColor = 'k';
 h(2).Color = 'g';
 h(3).Color = 'g';
 h(4).Color = 'g';
-[stats.base_p_subevoked_FR_R, stats.base_p_subevoked_FR] = corr(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)),sub_FR_evoked,'type','Spearman');
-% subplot(2,5,6);
-% plot(pupil_drift.Residuals.Raw,sub_FR_evoked,'o')
 xlabel('Baseline Pupil (residuals)')
 ylabel('Evoked FR: baselne subtracted')
 axis square;
 legend off;
 
-% Spearman%s partial correlation, r, 
-% between spiking (spike rate, 0–200 ms following beep onset 
-% minus baseline spike rate measured during fixation prior to beep onset) 
-% and pupil (maximum change in pupil diameter 0–800 ms following beep 
-% onset) responses, accounting for the effects of baseline pupil diameter 
-% on both variables.
-
-% baseline pupil, raw evoked evoked FR?  baseline FR?
-[stats.partial_base_p_evoked_FR_r, stats.partial_base_p_evoked_FR_p] = partialcorr(LC_Beep_data(:,4), raw_FR_evoked, LC_Beep_data(:,6),'Type','Spearman');
-% [stats.partial_base_p_evoked_FR_r, stats.partial_base_p_evoked_FR_p] = partialcorr(pupil_drift.Residuals.Raw(1:size(LC_Beep_data,1)), raw_FR_evoked, spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)),'Type','Spearman')
-
 %% 5) Is evoked pupil related to baseline FR?
-%   b) baseline subtracted evoked
-lm = fitlm(sub_p_evoked, spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)),'linear');
-lm2 = fitlm(sub_p_evoked, spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)), 'purequadratic');
-if sum(lm_table.spike_base)>0
-    lme = fitlme(lm_table,'pupil_evoked ~ spike_base');
-    lme2 = fitlme(lm_table,'pupil_evoked ~ spike_base*spike_base');
+
+[stats.subevoked_p_base_FR_R, stats.subevoked_p_base_FR] = corr(LC_Beep_table.pupil_bs_evoked, LC_Beep_table.spike_drift_residuals,'type','Spearman');
+[stats.partial_base_FR_evoked_p_r, stats.partial_base_FR_evoked_p_p] = partialcorr(LC_Beep_table.spike_drift_residuals,...
+    LC_Beep_table.pupil_bs_evoked+LC_Beep_table.pupil_baseline,...
+    LC_Beep_table.pupil_baseline,'Type','Spearman');
+
+lm = fitlm(LC_Beep_table,'pupil_bs_evoked ~ spike_drift_residuals');
+lm2 = fitlm(LC_Beep_table,'pupil_bs_evoked ~ spike_drift_residuals*spike_drift_residuals');
+
+if numel(unique(LC_Beep_table.spike_drift_residuals))>1
+    lme = fitlme(LC_Beep_table,'pupil_bs_evoked ~ spike_drift_residuals');
+    lme2 = fitlme(LC_Beep_table,'pupil_bs_evoked ~ spike_drift_residuals*spike_drift_residuals');
     results = compare(lme,lme2);
     stats.pEvoked_v_sBase = results.pValue(2);
-    stats.pEvoked_v_sBase_LLR = results.LogLik(1)./results.LogLik(2);
+    stats.pEvoked_v_sBase_LLR = 2*(results.LogLik(2) - results.LogLik(1)); %results.LogLik(1)./results.LogLik(2);
 else
     stats.pEvoked_v_sBase = NaN;
     stats.pEvoked_v_sBase_LLR = NaN;
@@ -237,34 +238,22 @@ h(1).Marker = 'none';
 h(2).Color = 'k';
 h(3).Color = 'k';
 h(4).Color = 'k';
-
 h=plot(lm2);
 h(1).Marker = 'o'; h(1).MarkerFaceColor = [0.5 0.5 0.5]; h(1).MarkerEdgeColor = 'k';
 h(2).Color = 'g';
 h(3).Color = 'g';
 h(4).Color = 'g';
-[stats.subevoked_p_base_FR_R, stats.subevoked_p_base_FR] = corr(sub_p_evoked, spike_drift.Residuals.Raw(1:size(LC_Beep_data,1)),'type','Spearman');
-% subplot(2,5,10);
-% plot(sub_p_evoked,spike_drift.Residuals.Raw,'o')
 xlabel('Evoked Pupil: baselne subtracted')
 ylabel('Baseline FR (residuals)')
 axis square;
 legend off;
 
-% baseline FR, raw evoked pupil, baseline pupil
-[stats.partial_base_FR_evoked_p_r, stats.partial_base_FR_evoked_p_p] = partialcorr(LC_Beep_data(:,6), raw_p_evoked, LC_Beep_data(:,4),'Type','Spearman');
-
-
 %% 6) Is evoked pupil related to evoked FR?
 subplot(3,4,6); hold off;
-plot(sub_p_evoked,sub_FR_evoked,'ok','MarkerFaceColor',[0.5 0.5 0.5])
+plot(LC_Beep_table.pupil_bs_evoked, LC_Beep_table.spike_bs_evoked,'ok','MarkerFaceColor',[0.5 0.5 0.5])
 j = lsline;
 j.Color = 'k';
-if stats.p <0.05
-    title('Evoked Responses')
-else
-    title('Evoked Responses')
-end
+title('Evoked Responses')
 xlabel({'Evoked Pupil', '(baseline subtracted)'})
 ylabel({'Evoked FR', '(baseline subtracted)'})
 axis square;
@@ -276,24 +265,21 @@ axis square;
 % and pupil (maximum change in pupil diameter 0–800 ms following beep 
 % onset) responses, accounting for the effects of baseline pupil diameter 
 % on both variables.
-[stats.partial_evoked_r, stats.partial_evoked_p] = partialcorr(raw_p_evoked, sub_FR_evoked, LC_Beep_data(:,4),'Type','Spearman');
+[stats.partial_evoked_r, stats.partial_evoked_p] = partialcorr(LC_Beep_table.pupil_bs_evoked+LC_Beep_table.pupil_baseline,...
+    LC_Beep_table.spike_bs_evoked, LC_Beep_table.pupil_baseline,'Type','Spearman');
 % Alternatively, why not just compare the baseline subtracted responses
 % directly?
-[stats.bs_evoked_r, stats.bs_evoked_p] = corr(sub_p_evoked, sub_FR_evoked,'Type','Spearman');
+[stats.bs_evoked_r, stats.bs_evoked_p] = corr(LC_Beep_table.pupil_bs_evoked, LC_Beep_table.spike_bs_evoked,'Type','Spearman');
 
+%% Get some other measures
+% mean evoked responses
+stats.mean_spike_evoked_mag = mean(LC_Beep_table.spike_bs_evoked,'omitnan');
+stats.mean_pupil_evoked_mag = mean(LC_Beep_table.pupil_bs_evoked,'omitnan');
 
+% range of evoked responses
+stats.range_spike_evoked_mag = max(LC_Beep_table.spike_bs_evoked) - min(LC_Beep_table.spike_bs_evoked);
+stats.range_pupil_evoked_mag = max(LC_Beep_table.pupil_bs_evoked) - min(LC_Beep_table.pupil_bs_evoked);
 
-
-%   a) raw evoked pupil vs baseline sub evoked FR
-stats.evoked_p_subevoked_FR = corr(corrected_p_evoked, sub_FR_evoked,'type','Spearman');
-%   b) raw evoked pupil vs raw evoked FR
-stats.evoked_p_voked_FR = corr(corrected_p_evoked, corrected_FR_evoked,'type','Spearman');
-%   c) baseline sub pupil vs baseline sub evoked FR
-stats.subevoked_p_subevoked_FR = corr(sub_p_evoked, sub_FR_evoked,'type','Spearman');
-%   d) baseline sub pupil vs raw evoked FR
-stats.subevoked_p_evoked_FR = corr(sub_p_evoked, corrected_FR_evoked,'type','Spearman');
-
-%% Get magnitude of evoked
-stats.mean_spike_evoked_mag = mean(sub_FR_evoked,'omitnan');
-stats.mean_pupil_evoked_mag = mean(sub_p_evoked,'omitnan');
+stats.range_spike_baseline = max(LC_Beep_table.spike_baseline) - min(LC_Beep_table.spike_baseline);
+stats.range_pupil_baseline = max(LC_Beep_table.pupil_baseline) - min(LC_Beep_table.pupil_baseline);
 end
