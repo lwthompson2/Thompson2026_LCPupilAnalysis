@@ -10,7 +10,7 @@ for ith_unit = 1:length(unique(LC_Beep_data(:,3)))
     disp(sprintf('Unit summary %d/%d', ...
                     ith_unit, length(unique(LC_Beep_data(:,3)))))
     stats(ith_unit) = unitSummaryPlot(LC_Beep_table(LC_Beep_table.unit_id==ith_unit,:), LC_Fix_table(LC_Fix_table.unit_id==ith_unit,:));
-    stats(ith_unit).unit_id = ith_unit; % because you remove neurons by index later
+    unit_ids(ith_unit) = ith_unit; % because you remove neurons by index later
     mm = LC_Beep_data(LC_Beep_data(:,3)==ith_unit,1);
     mm = mm(1);
     %% Save the figure?
@@ -30,7 +30,7 @@ for ith_unit = 1:length(unique(LC_Beep_data(:,3)))
     end
 end
 stats = struct2table(stats);
-
+stats.unit_id = unit_ids';
 %% remove unwanted neurons
 stats([to_remove],:) = [];
 session_numbers_unique(to_remove) = [];

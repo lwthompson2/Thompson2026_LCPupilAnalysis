@@ -12,7 +12,7 @@ close all
 % Flag
 collect_data = true;
 save_figs = false;
-do_zscore = false;
+do_zscore = true;
 
 % Collect data from both monkeys
 monkeys = {'Oz' 'Cicero'};
@@ -124,15 +124,20 @@ if collect_data
                         % raw_beep_pd(bb,:) = pd(bi-min_ind:bi+min_ind);
                         
                         % New from fix on to beep on.
-                        % Something is clearly wrong since some fix start
-                        % times are before/after beep on time.
                         baseline = mean(pd(1:bi),'omitnan');
                         % Old
                         % baseline = mean(pd(bi+pupil_baseline_times),'omitnan');
                         
                         % evoked = mean(pd(bi+pupil_evoked_times),'omitnan');
-                        evoked = max(nanrunmean(pd(bi+pupil_evoked_times),50));
-                        pupil_data(bb,:) = [baseline, evoked-baseline];
+                        max_evoked = max(nanrunmean(pd(bi+pupil_evoked_times)-baseline,50)); % baseline subtracted
+                        min_evoked = min(nanrunmean(pd(bi+pupil_evoked_times)-baseline,50));
+                        if abs(max_evoked)>abs(min_evoked)
+                            evoked = max_evoked;
+                        else
+                            evoked = min_evoked;
+                        end
+                        % evoked = max(nanrunmean(pd(bi+pupil_evoked_times),50));
+                        pupil_data(bb,:) = [baseline, evoked];
 
                         % Get spike data per unit
                         for uu = 1:num_single_units
@@ -212,7 +217,7 @@ if collect_data
                         spike_rate_data(:,2,uu) = spike_data(:,2,uu)./ ...
                             diff(times(4,:)).*1000;
 
-                        Lg = isfinite(spike_rate_data(:,1,uu)) & isfinite(pupil_data(:,1)) & isfinite(pupil_data(:,2)) & zscore(spike_rate_data(:,2,uu))<8;
+                        Lg = isfinite(spike_rate_data(:,1,uu)) & isfinite(pupil_data(:,1)) & isfinite(pupil_data(:,2)) & abs(zscore(spike_rate_data(:,2,uu)))<8;
                         Lg_fix = isfinite(spike_rate_fix_data(:,uu)) & isfinite(pupil_fix_data);
                         if do_zscore
                             % Get all the firing rate data including evoked

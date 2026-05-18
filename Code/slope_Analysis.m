@@ -1,13 +1,11 @@
-% Script for getting & plotting 
-%   LC & pupil baseline/evoked relationships
-%   
-% Data are "cleaned" versions of FIRA from Sidd's 2016 LC-pupil paper
-%   created by cleanLCP_FIRA.m
-%   The data are in cell arrays called "siteData", descrption
-%   is at the bottom of this file
-
-% Flag
-collect_data = true;
+% This script has been archived and replaced with a small shim.
+% The original file was moved to `Code/archive/slope_Analysis.m`.
+warning('`slope_Analysis.m` has been archived. Original is in `Code/archive/slope_Analysis.m`.');
+return
+% This script has been archived and replaced with a small shim.
+% The original file was moved to `Code/archive/slope_Analysis.m`.
+warning('`slope_Analysis.m` has been archived. Original is in `Code/archive/slope_Analysis.m`.');
+return
 
 % Collect data from both monkeys
 monkeys = {'Oz' 'Cicero'};

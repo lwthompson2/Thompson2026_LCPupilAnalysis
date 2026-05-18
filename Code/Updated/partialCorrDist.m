@@ -2,8 +2,8 @@ plotOptions.monkey_symbols = {'o','d'};
 x_start = [1,5];
 temp_session_numbers_unique = session_numbers_unique;
 % filter?
-temp_stats = stats; %(stats.evoked_spikes<0.05,:);
-temp_session_numbers_unique = session_numbers_unique; %(stats.evoked_spikes<0.05);
+temp_stats = stats; %(stats.p<0.05,:);
+temp_session_numbers_unique = session_numbers_unique; %(stats.p<0.05);
 if size(temp_session_numbers_unique,1) == 1
     temp_session_numbers_unique = temp_session_numbers_unique';
 end
