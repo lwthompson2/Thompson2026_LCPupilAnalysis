@@ -91,6 +91,20 @@ report_signedrank_by_monkey(fig2_row5, ...
 report_signedrank_by_monkey(fig2_row6, ...
     ['Baseline LC activity vs baseline-subtracted evoked pupil responses']);
 
+% ---------------------------------------------------------------------
+% Additional subset analysis: units with significant baseline LC-pupil
+% partial Spearman relationships (row 3 criterion).
+% ---------------------------------------------------------------------
+sig_baseline_units = fig2_row3.unit_id(fig2_row3.p < 0.05 & isfinite(fig2_row3.p));
+fig2_row5_sigbase = fig2_row5(ismember(fig2_row5.unit_id, sig_baseline_units), :);
+fig2_row6_sigbase = fig2_row6(ismember(fig2_row6.unit_id, sig_baseline_units), :);
+
+fprintf('\nSubset analysis (units with significant baseline LC-pupil partial Spearman):\n');
+report_signedrank_by_monkey(fig2_row5_sigbase, ...
+    ['Baseline pupil diameter vs baseline-subtracted evoked LC responses']);
+report_signedrank_by_monkey(fig2_row6_sigbase, ...
+    ['Baseline LC activity vs baseline-subtracted evoked pupil responses']);
+
 fprintf('Across-epoch range-impact analyses (legacy correlationsEvokedMag logic):\n');
 
 range_tbl = build_evoked_range_by_unit(beep_raw);

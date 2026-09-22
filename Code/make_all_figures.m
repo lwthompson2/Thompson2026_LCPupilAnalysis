@@ -42,6 +42,14 @@ try
     Figure_S1_combined(paths);
     fprintf(logfid, 'Figure S1 combined done.\n');
 
+    fprintf(logfid, 'Figure S3 subset summary...\n');
+    Figure_S3_sig_baseline_subset(paths);
+    fprintf(logfid, 'Figure S3 subset summary done.\n');
+
+    fprintf(logfid, 'Figure S4 range impact...\n');
+    Figure_S4_range_impact(paths);
+    fprintf(logfid, 'Figure S4 range impact done.\n');
+
     fprintf(logfid, 'All figures complete: %s\n', datestr(now));
 
 catch ME

@@ -1,0 +1,5 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/Applications/MATLAB_R2023b.app/bin/matlab": true
+    }
+}
