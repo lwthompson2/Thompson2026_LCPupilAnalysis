@@ -30,9 +30,9 @@ try
     Figure_S2_LLR(paths);
     fprintf(logfid, 'Figure S2 done.\n');
 
-    fprintf(logfid, 'Figure 3: pooled...\n');
-    Figure_03_pooled(paths);
-    fprintf(logfid, 'Figure 3 done.\n');
+    %fprintf(logfid, 'Figure 3: pooled...\n');
+    %Figure_03_pooled(paths);
+    %fprintf(logfid, 'Figure 3 done.\n');
 
     fprintf(logfid, 'Figure S1 summary row...\n');
     Figure_S1_summary(paths);

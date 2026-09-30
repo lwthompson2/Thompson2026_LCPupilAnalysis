@@ -226,9 +226,10 @@ f2 = sprintf('%s ~ %s*%s', response_var, predictor_var, predictor_var);
 
 % Primary path: match legacy use of fitlme/compare.
 try
-    lme1 = fitlme(sub, f1);
-    lme2 = fitlme(sub, f2);
-    cmp = compare(lme1, lme2);
+    % Evaluate quietly to suppress frequent near-perfect-fit warning text.
+    evalc('lme1 = fitlme(sub, f1);');
+    evalc('lme2 = fitlme(sub, f2);');
+    evalc('cmp = compare(lme1, lme2);');
     if ismember('LogLik', cmp.Properties.VariableNames) && height(cmp) >= 2
         llr = 2*(cmp.LogLik(2) - cmp.LogLik(1));
         return

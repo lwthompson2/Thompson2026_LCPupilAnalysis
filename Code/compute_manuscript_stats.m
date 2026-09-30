@@ -105,6 +105,57 @@ report_signedrank_by_monkey(fig2_row5_sigbase, ...
 report_signedrank_by_monkey(fig2_row6_sigbase, ...
     ['Baseline LC activity vs baseline-subtracted evoked pupil responses']);
 
+% ---------------------------------------------------------------------
+% Figure 2 prediction/generalization (5-fold CV; held-out trials)
+% ---------------------------------------------------------------------
+cv_mat = fullfile(results_dir, 'Figure2_cv_metrics.mat');
+if exist(cv_mat, 'file')
+    s_cv = load(cv_mat, 'cv_tbl');
+    if isfield(s_cv, 'cv_tbl') && ~isempty(s_cv.cv_tbl)
+        cv_tbl = s_cv.cv_tbl;
+        fprintf('\nFigure 2 prediction/generalization (5-fold CV; held-out trials):\n');
+        for rr = 1:6
+            row_tbl = cv_tbl(cv_tbl.row_num == rr, :);
+            if isempty(row_tbl)
+                continue
+            end
+            row_label = char(row_tbl.row_label(1));
+            for mm = 1:2
+                m_tbl = row_tbl(row_tbl.monkey_id == mm, :);
+                rho_vals = m_tbl.cv_rho(isfinite(m_tbl.cv_rho));
+                r2_vals = m_tbl.cv_r2(isfinite(m_tbl.cv_r2));
+
+                p_rho = NaN;
+                p_r2 = NaN;
+                if ~isempty(rho_vals)
+                    try
+                        p_rho = signrank(rho_vals);
+                    catch
+                    end
+                end
+                if ~isempty(r2_vals)
+                    try
+                        p_r2 = signrank(r2_vals);
+                    catch
+                    end
+                end
+
+                fprintf('%s: %s CV rho median = %.3f (p = %s, N = %d).\n', ...
+                    row_label, monkey_short(mm), median(rho_vals, 'omitnan'), p_to_sci_str(p_rho), numel(rho_vals));
+                fprintf('%s: %s CV R^2 median = %.3f (p = %s, N = %d).\n', ...
+                    row_label, monkey_short(mm), median(r2_vals, 'omitnan'), p_to_sci_str(p_r2), numel(r2_vals));
+
+                if ismember('cv_r2_perm_p', m_tbl.Properties.VariableNames)
+                    perm_p = m_tbl.cv_r2_perm_p(isfinite(m_tbl.cv_r2_perm_p));
+                    n_perm_sig = sum(perm_p < 0.05);
+                    fprintf('%s: %s permutation-significant CV R^2 count = %d/%d (p_perm < 0.05).\n', ...
+                        row_label, monkey_short(mm), n_perm_sig, numel(perm_p));
+                end
+            end
+        end
+    end
+end
+
 fprintf('Across-epoch range-impact analyses (legacy correlationsEvokedMag logic):\n');
 
 range_tbl = build_evoked_range_by_unit(beep_raw);
