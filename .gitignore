@@ -8,6 +8,9 @@
 # VS Code local settings
 .vscode/
 
+# External dependencies managed outside this repo
+Code/external/
+
 # Local machine-specific MATLAB config
 Code/config_paths.m
 
