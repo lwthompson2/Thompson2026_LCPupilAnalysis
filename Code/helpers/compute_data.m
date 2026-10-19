@@ -12,13 +12,29 @@ if nargin < 1 || isempty(paths)
 end
 if nargin < 2, options = struct(); end
 if ~isfield(options,'force'), options.force = false; end
+if ~isfield(options,'source') || isempty(options.source)
+    options.source = 'mat';
+end
+if ~isfield(options,'manuscript_filter') || isempty(options.manuscript_filter)
+    options.manuscript_filter = true;
+end
+if ~isfield(options,'session_include_csv') || isempty(options.session_include_csv)
+    options.session_include_csv = fullfile(fileparts(fileparts(mfilename('fullpath'))), 'dandi_tools', 'manuscript_session_include.csv');
+end
+if ~isfield(options,'unit_include_csv') || isempty(options.unit_include_csv)
+    options.unit_include_csv = fullfile(fileparts(fileparts(mfilename('fullpath'))), 'dandi_tools', 'manuscript_unit_include.csv');
+end
+options.source = lower(string(options.source));
+if ~ismember(options.source, ["mat", "nwb"])
+    error('options.source must be ''mat'' or ''nwb''');
+end
 
 results_dir = paths.results_dir;
 if ~exist(results_dir,'dir'), mkdir(results_dir); end
 
 raw_mat = fullfile(results_dir, 'LC_data_raw.mat');
 z_mat = fullfile(results_dir, 'LC_data_zscored.mat');
-processing_version = 'trial_filter_absz_lt8_combinedz_v2';
+processing_version = sprintf('trial_filter_absz_lt8_combinedz_v2_%s', char(options.source));
 
 % If cached files exist and not forced, load and return.
 % Guard with processing_version so stale caches from previous filtering
@@ -39,68 +55,132 @@ if ~options.force && exist(raw_mat,'file') && exist(z_mat,'file')
     end
 end
 
-% Build site list (monkeys default inside helper)
-sites = load_site_list();
 all_beep = table();
 all_fix = table();
-legacy_unit_counter = 0;
-legacy_unit_map = containers.Map('KeyType','char','ValueType','double');
-for si = 1:numel(sites)
-    s = sites(si);
-    if isempty(s.base_dir) || isempty(s.fnames), continue; end
-    for f = 1:numel(s.fnames)
-        fname = s.fnames{f};
-        file_key_prefix = sprintf('%s|%s', s.monkey, fname);
-        try
-            tmp = load(fullfile(s.base_dir, fname), 'siteData');
-            if isfield(tmp, 'siteData') && iscell(tmp.siteData) && numel(tmp.siteData) >= 3
-                siteData = tmp.siteData; %#ok<NASGU>
-                times = [-100 0; 0 800; -400 0; 0 200];
-                Fbeep = find(siteData{1}(:,3)==1 & ...
-                    siteData{1}(:,4)>abs(min(times(:,1))) & ...
-                    siteData{1}(:,4)<size(siteData{2},2)-max(times(:,2)));
-                Ffix = find(siteData{1}(:,3)==1 & ...
-                    isnan(siteData{1}(:,4)) & ...
-                    isnan(siteData{1}(:,9)));
-                num_single_units = max(0, size(siteData{3},2)-1);
-                if ~isempty(Fbeep) && ~isempty(Ffix) && num_single_units > 0
-                    for uu = 1:num_single_units
-                        legacy_unit_counter = legacy_unit_counter + 1;
-                        legacy_unit_map(sprintf('%s|%d', file_key_prefix, uu)) = legacy_unit_counter;
+
+if options.source == "mat"
+    % Build site list (monkeys default inside helper)
+    sites = load_site_list();
+    legacy_unit_counter = 0;
+    legacy_unit_map = containers.Map('KeyType','char','ValueType','double');
+    for si = 1:numel(sites)
+        s = sites(si);
+        if isempty(s.base_dir) || isempty(s.fnames), continue; end
+        for f = 1:numel(s.fnames)
+            fname = s.fnames{f};
+            file_key_prefix = sprintf('%s|%s', s.monkey, fname);
+            try
+                tmp = load(fullfile(s.base_dir, fname), 'siteData');
+                if isfield(tmp, 'siteData') && iscell(tmp.siteData) && numel(tmp.siteData) >= 3
+                    siteData = tmp.siteData; %#ok<NASGU>
+                    times = [-100 0; 0 800; -400 0; 0 200];
+                    Fbeep = find(siteData{1}(:,3)==1 & ...
+                        siteData{1}(:,4)>abs(min(times(:,1))) & ...
+                        siteData{1}(:,4)<size(siteData{2},2)-max(times(:,2)));
+                    Ffix = find(siteData{1}(:,3)==1 & ...
+                        isnan(siteData{1}(:,4)) & ...
+                        isnan(siteData{1}(:,9)));
+                    num_single_units = max(0, size(siteData{3},2)-1);
+                    if ~isempty(Fbeep) && ~isempty(Ffix) && num_single_units > 0
+                        for uu = 1:num_single_units
+                            legacy_unit_counter = legacy_unit_counter + 1;
+                            legacy_unit_map(sprintf('%s|%d', file_key_prefix, uu)) = legacy_unit_counter;
+                        end
                     end
                 end
+            catch
+                % leave unmapped; processing path will still try to read file
             end
-        catch
-            % leave unmapped; processing path will still try to read file
-        end
-        try
-            [b,fk] = process_site_file(s.base_dir, fname, s.monkey);
-            if ~isempty(b)
-                b.legacy_unit_id = NaN(height(b),1);
-                for ii = 1:height(b)
-                    key = sprintf('%s|%s|%d', b.monkey{ii}, b.session_file{ii}, b.unit(ii));
-                    if isKey(legacy_unit_map, key)
-                        b.legacy_unit_id(ii) = legacy_unit_map(key);
+            try
+                [b,fk] = process_site_file(s.base_dir, fname, s.monkey);
+                if ~isempty(b)
+                    b.legacy_unit_id = NaN(height(b),1);
+                    for ii = 1:height(b)
+                        key = sprintf('%s|%s|%d', b.monkey{ii}, b.session_file{ii}, b.unit(ii));
+                        if isKey(legacy_unit_map, key)
+                            b.legacy_unit_id(ii) = legacy_unit_map(key);
+                        end
                     end
+                    all_beep = [all_beep; b];
                 end
-                all_beep = [all_beep; b];
-            end
-            if ~isempty(fk)
-                fk.legacy_unit_id = NaN(height(fk),1);
-                for ii = 1:height(fk)
-                    key = sprintf('%s|%s|%d', fk.monkey{ii}, fk.session_file{ii}, fk.unit(ii));
-                    if isKey(legacy_unit_map, key)
-                        fk.legacy_unit_id(ii) = legacy_unit_map(key);
+                if ~isempty(fk)
+                    fk.legacy_unit_id = NaN(height(fk),1);
+                    for ii = 1:height(fk)
+                        key = sprintf('%s|%s|%d', fk.monkey{ii}, fk.session_file{ii}, fk.unit(ii));
+                        if isKey(legacy_unit_map, key)
+                            fk.legacy_unit_id(ii) = legacy_unit_map(key);
+                        end
                     end
+                    all_fix = [all_fix; fk];
                 end
-                all_fix = [all_fix; fk];
+            catch ME
+                % include full report to aid debugging
+                rpt = getReport(ME,'extended','hyperlinks','off');
+                warning('process_site_file failed for %s:\n%s', fname, rpt);
             end
-        catch ME
-            % include full report to aid debugging
-            rpt = getReport(ME,'extended','hyperlinks','off');
-            warning('process_site_file failed for %s:\n%s', fname, rpt);
         end
     end
+else
+    [all_beep, all_fix] = build_tables_from_nwb(paths);
+    if ~isempty(all_beep)
+        all_beep.legacy_unit_id = NaN(height(all_beep),1);
+    end
+    if ~isempty(all_fix)
+        all_fix.legacy_unit_id = NaN(height(all_fix),1);
+    end
+
+    % Recreate deterministic legacy-style unit IDs by session and local unit.
+    if ~isempty(all_beep) || ~isempty(all_fix)
+        Kb = table();
+        Kf = table();
+        if ~isempty(all_beep)
+            Kb = all_beep(:, {'monkey','session_file','unit'});
+        end
+        if ~isempty(all_fix)
+            Kf = all_fix(:, {'monkey','session_file','unit'});
+        end
+        K = unique([Kb; Kf], 'rows', 'stable');
+
+        monkey_ord = zeros(height(K),1);
+        for ki = 1:height(K)
+            if strcmpi(K.monkey{ki}, 'Oz')
+                monkey_ord(ki) = 1;
+            elseif strcmpi(K.monkey{ki}, 'Cicero')
+                monkey_ord(ki) = 2;
+            else
+                monkey_ord(ki) = 99;
+            end
+        end
+        K.monkey_ord = monkey_ord;
+        K = sortrows(K, {'monkey_ord','session_file','unit'});
+        K.legacy_unit_id = (1:height(K))';
+
+        key_map = containers.Map('KeyType', 'char', 'ValueType', 'double');
+        for ki = 1:height(K)
+            k = sprintf('%s|%s|%d', K.monkey{ki}, K.session_file{ki}, K.unit(ki));
+            key_map(k) = K.legacy_unit_id(ki);
+        end
+        if ~isempty(all_beep)
+            for bi = 1:height(all_beep)
+                k = sprintf('%s|%s|%d', all_beep.monkey{bi}, all_beep.session_file{bi}, all_beep.unit(bi));
+                if isKey(key_map, k)
+                    all_beep.legacy_unit_id(bi) = key_map(k);
+                end
+            end
+        end
+        if ~isempty(all_fix)
+            for fi = 1:height(all_fix)
+                k = sprintf('%s|%s|%d', all_fix.monkey{fi}, all_fix.session_file{fi}, all_fix.unit(fi));
+                if isKey(key_map, k)
+                    all_fix.legacy_unit_id(fi) = key_map(k);
+                end
+            end
+        end
+    end
+end
+
+if options.manuscript_filter
+    [all_beep, all_fix] = apply_manuscript_filter(all_beep, all_fix, options.session_include_csv, options.unit_include_csv);
 end
 
 raw_tables = struct('beep', all_beep, 'fix', all_fix);

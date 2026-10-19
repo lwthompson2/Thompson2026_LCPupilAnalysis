@@ -106,14 +106,29 @@ report_signedrank_by_monkey(fig2_row6_sigbase, ...
     ['Baseline LC activity vs baseline-subtracted evoked pupil responses']);
 
 % ---------------------------------------------------------------------
-% Figure 2 prediction/generalization (5-fold CV; held-out trials)
+% Figure 2 prediction/generalization (CV; held-out trials)
 % ---------------------------------------------------------------------
-cv_mat = fullfile(results_dir, 'Figure2_cv_metrics.mat');
-if exist(cv_mat, 'file')
-    s_cv = load(cv_mat, 'cv_tbl');
+cv_candidates = {
+    fullfile(results_dir, 'Figure2_cv_metrics_loocv_final.mat'), ...
+    fullfile(results_dir, 'Figure2_cv_metrics_loocv.mat'), ...
+    fullfile(results_dir, 'Figure2_cv_metrics.mat') ...
+    };
+cv_mat = '';
+for ci = 1:numel(cv_candidates)
+    if exist(cv_candidates{ci}, 'file')
+        cv_mat = cv_candidates{ci};
+        break
+    end
+end
+if ~isempty(cv_mat)
+    s_cv = load(cv_mat, 'cv_tbl', 'opts');
     if isfield(s_cv, 'cv_tbl') && ~isempty(s_cv.cv_tbl)
         cv_tbl = s_cv.cv_tbl;
-        fprintf('\nFigure 2 prediction/generalization (5-fold CV; held-out trials):\n');
+        cv_method_label = 'CV';
+        if isfield(s_cv, 'opts') && isfield(s_cv.opts, 'cv_method') && ~isempty(s_cv.opts.cv_method)
+            cv_method_label = upper(char(s_cv.opts.cv_method));
+        end
+        fprintf('\nFigure 2 prediction/generalization (%s; held-out trials):\n', cv_method_label);
         for rr = 1:6
             row_tbl = cv_tbl(cv_tbl.row_num == rr, :);
             if isempty(row_tbl)

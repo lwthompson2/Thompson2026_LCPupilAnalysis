@@ -6,6 +6,14 @@ function paths = config_paths()
     % e.g. '/Users/lowell/Library/CloudStorage/Box-Box/GoldLab/Data/Physiology/PD_Fixation/Recording'
     paths.data_root = '/Users/lowell/Library/CloudStorage/Box-Box/GoldLab/Data/Physiology/PD_Fixation/Recording';
 
+    % Path to local DANDI folder containing NWB files.
+    % Example: '<repo_root>/002034' after `dandi download`.
+    paths.nwb_root = fullfile(fileparts(mfilename('fullpath')), '..', '002034');
+
+    % Python command used by NWB extraction helpers.
+    % Leave empty to auto-detect (.venv-dandi311/bin/python, then python3).
+    paths.python_cmd = '';
+
     % Output directory for paper figures (PDF). These will be created if missing.
     repo_root = fileparts(mfilename('fullpath'));
     paths.output_figures = fullfile(repo_root, 'Figures', 'Paper');

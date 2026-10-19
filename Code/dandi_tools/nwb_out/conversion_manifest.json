@@ -1,0 +1,16 @@
+{
+  "created_utc": "2026-10-19T17:15:31.674482+00:00",
+  "repo_root": "/Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis",
+  "data_root": "/Users/lowell/Library/CloudStorage/Box-Box/GoldLab/Data/Physiology/PD_Fixation/Recording",
+  "converted": [
+    {
+      "monkey": "Oz",
+      "input": "/Users/lowell/Library/CloudStorage/Box-Box/GoldLab/Data/Physiology/PD_Fixation/Recording/Oz/LC/clean/Oz_022613_d10_225_Fixn.mat",
+      "output": "Code/dandi_tools/nwb_out/sub-Oz_ses-001_ecephys.nwb",
+      "n_trials": 225,
+      "n_units": 2,
+      "n_units_written": 2
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,27 @@
+# Python environment
+.venv/
+
+# macOS
+.DS_Store
+
+# VS Code local settings
+.vscode/
+
+# Local machine-specific MATLAB config
+Code/config_paths.m
+
+# Generated analysis caches and tables
+Code/Results/*.mat
+Code/Results/*.csv
+Code/Results/*.xlsx
+Code/Results/*.log
+Code/Results/_*/
+
+# Generated figure exports from code pipeline
+Code/Figures/Paper/*.pdf
+Code/Figures/Paper/*.png
+Code/Figures/Paper/*.tif
+Code/Figures/Paper/*.tiff
+
+# Keep curated manuscript deliverables tracked in top-level Figures/Paper/
+# (Submitted/, Revised/, Components/ are intentionally not ignored)

@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-10-19T18:04:17.340971+00:00",
+  "repo_root": "/Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis",
+  "data_root": "/Users/lowell/Library/CloudStorage/Box-Box/GoldLab/Data/Physiology/PD_Fixation/Recording",
+  "dandiset_dir": "/Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis/002034",
+  "sessions_tested": 83,
+  "sessions_passed": 83,
+  "sessions_failed": 0,
+  "pass_rate": 1.0,
+  "failures": []
+}

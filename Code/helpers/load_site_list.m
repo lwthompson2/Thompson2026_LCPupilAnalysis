@@ -10,7 +10,7 @@ sites = struct('monkey',{},'base_dir',{},'fnames',{});
 for i = 1:numel(monkeys)
     m = monkeys{i};
     try
-        [base_dir, fnames] = getLCP_cleanDataDir(m, 'LC');
+        [base_dir, fnames] = getLCP_cleanDataDir_core(m, 'LC');
     catch
         base_dir = '';
         fnames = {};

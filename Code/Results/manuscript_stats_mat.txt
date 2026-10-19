@@ -1,0 +1,102 @@
+
+================ Manuscript-Style Statistical Summary ================
+
+Data were pooled across 82 sessions (32 Oz, 50 Ci) and 103 units (42 Oz, 61 Ci).
+The analyzed dataset included 3974 beep trials and 15770 non-beep fixation trials.
+
+Baseline pupil and baseline FR (partial Spearman, controlling time) were significant in 38/103 units, with 31 positive and 7 negative relationships.
+By monkey: Oz 16/42 significant; Ci 22/61 significant.
+
+Figure 2 summary-column median tests (Wilcoxon signed-rank vs median = 0):
+Baseline LC activity vs baseline pupil diameter (partial Spearman; residuals): Oz p = 0.000521 (N = 42, median rho = 0.077).
+Baseline LC activity vs baseline pupil diameter (partial Spearman; residuals): Ci p = 1.14e-05 (N = 63, median rho = 0.097).
+Baseline-subtracted evoked LC responses vs baseline-subtracted evoked pupil responses: Oz p = 0.0135 (N = 42, median rho = 0.088).
+Baseline-subtracted evoked LC responses vs baseline-subtracted evoked pupil responses: Ci p = 0.00153 (N = 63, median rho = 0.053).
+Baseline-subtracted evoked LC responses vs baseline LC activity (residuals): Oz p = 5.88e-07 (N = 42, median rho = -0.381).
+Baseline-subtracted evoked LC responses vs baseline LC activity (residuals): Ci p = 1.48e-11 (N = 63, median rho = -0.315).
+Baseline-subtracted evoked pupil responses vs baseline pupil diameter (residuals): Oz p = 1.16e-06 (N = 32, median rho = -0.331).
+Baseline-subtracted evoked pupil responses vs baseline pupil diameter (residuals): Ci p = 1.13e-08 (N = 50, median rho = -0.336).
+Baseline pupil diameter vs baseline-subtracted evoked LC responses: Oz p = 0.915 (N = 42, median rho = 0.033).
+Baseline pupil diameter vs baseline-subtracted evoked LC responses: Ci p = 0.0105 (N = 63, median rho = -0.037).
+Baseline LC activity vs baseline-subtracted evoked pupil responses: Oz p = 0.846 (N = 42, median rho = 0.033).
+Baseline LC activity vs baseline-subtracted evoked pupil responses: Ci p = 0.897 (N = 63, median rho = -0.015).
+
+Subset analysis (units with significant baseline LC-pupil partial Spearman):
+Baseline pupil diameter vs baseline-subtracted evoked LC responses: Oz p = 0.379 (N = 16, median rho = -0.033).
+Baseline pupil diameter vs baseline-subtracted evoked LC responses: Ci p = 0.00498 (N = 22, median rho = -0.069).
+Baseline LC activity vs baseline-subtracted evoked pupil responses: Oz p = 0.642 (N = 16, median rho = 0.005).
+Baseline LC activity vs baseline-subtracted evoked pupil responses: Ci p = 0.987 (N = 22, median rho = 0.013).
+
+Figure 2 prediction/generalization (LOOCV; held-out trials):
+Baseline Pupil -> Evoked Pupil: Oz CV rho median = 0.221 (p = 0.135, N = 32).
+Baseline Pupil -> Evoked Pupil: Oz CV R^2 median = 0.032 (p = 0.765, N = 32).
+Baseline Pupil -> Evoked Pupil: Oz permutation-significant CV R^2 count = 16/32 (p_perm < 0.05).
+Baseline Pupil -> Evoked Pupil: Ci CV rho median = 0.278 (p = 0.122, N = 52).
+Baseline Pupil -> Evoked Pupil: Ci CV R^2 median = 0.020 (p = 0.913, N = 52).
+Baseline Pupil -> Evoked Pupil: Ci permutation-significant CV R^2 count = 26/52 (p_perm < 0.05).
+Baseline LC -> Evoked LC: Oz CV rho median = 0.201 (p = 0.145, N = 42).
+Baseline LC -> Evoked LC: Oz CV R^2 median = -0.047 (p = 0.105, N = 42).
+Baseline LC -> Evoked LC: Oz permutation-significant CV R^2 count = 14/42 (p_perm < 0.05).
+Baseline LC -> Evoked LC: Ci CV rho median = 0.110 (p = 0.712, N = 63).
+Baseline LC -> Evoked LC: Ci CV R^2 median = -0.048 (p = 0.000343, N = 63).
+Baseline LC -> Evoked LC: Ci permutation-significant CV R^2 count = 16/63 (p_perm < 0.05).
+Baseline Pupil -> Baseline LC: Oz CV rho median = -0.004 (p = 0.955, N = 42).
+Baseline Pupil -> Baseline LC: Oz CV R^2 median = -0.016 (p = 0.326, N = 42).
+Baseline Pupil -> Baseline LC: Oz permutation-significant CV R^2 count = 15/42 (p_perm < 0.05).
+Baseline Pupil -> Baseline LC: Ci CV rho median = 0.054 (p = 0.00153, N = 63).
+Baseline Pupil -> Baseline LC: Ci CV R^2 median = -0.006 (p = 0.88, N = 63).
+Baseline Pupil -> Baseline LC: Ci permutation-significant CV R^2 count = 27/63 (p_perm < 0.05).
+Evoked Pupil -> Evoked LC: Oz CV rho median = -0.368 (p = 0.000824, N = 42).
+Evoked Pupil -> Evoked LC: Oz CV R^2 median = -0.134 (p = 6.47e-05, N = 42).
+Evoked Pupil -> Evoked LC: Oz permutation-significant CV R^2 count = 8/42 (p_perm < 0.05).
+Evoked Pupil -> Evoked LC: Ci CV rho median = -0.262 (p = 1.04e-08, N = 63).
+Evoked Pupil -> Evoked LC: Ci CV R^2 median = -0.086 (p = 2.88e-10, N = 63).
+Evoked Pupil -> Evoked LC: Ci permutation-significant CV R^2 count = 4/63 (p_perm < 0.05).
+Baseline Pupil -> Evoked LC: Oz CV rho median = -0.159 (p = 0.00294, N = 42).
+Baseline Pupil -> Evoked LC: Oz CV R^2 median = -0.131 (p = 1.19e-07, N = 42).
+Baseline Pupil -> Evoked LC: Oz permutation-significant CV R^2 count = 3/42 (p_perm < 0.05).
+Baseline Pupil -> Evoked LC: Ci CV rho median = -0.459 (p = 2.23e-08, N = 63).
+Baseline Pupil -> Evoked LC: Ci CV R^2 median = -0.100 (p = 5.09e-10, N = 63).
+Baseline Pupil -> Evoked LC: Ci permutation-significant CV R^2 count = 4/63 (p_perm < 0.05).
+Evoked Pupil -> Baseline LC: Oz CV rho median = -0.207 (p = 0.000216, N = 42).
+Evoked Pupil -> Baseline LC: Oz CV R^2 median = -0.106 (p = 1.43e-06, N = 42).
+Evoked Pupil -> Baseline LC: Oz permutation-significant CV R^2 count = 5/42 (p_perm < 0.05).
+Evoked Pupil -> Baseline LC: Ci CV rho median = -0.234 (p = 5.45e-08, N = 63).
+Evoked Pupil -> Baseline LC: Ci CV R^2 median = -0.081 (p = 4.67e-10, N = 63).
+Evoked Pupil -> Baseline LC: Ci permutation-significant CV R^2 count = 5/63 (p_perm < 0.05).
+Across-epoch range-impact analyses (legacy correlationsEvokedMag logic):
+Baseline pupil diameter vs evoked LC relationship as a function of evoked LC range (Spearman rho = 0.02, p = 0.89 for monkey Oz).
+Baseline LC activity vs evoked pupil relationship as a function of evoked pupil range (Spearman rho = -0.33, p = 0.0319 for monkey Oz).
+Baseline pupil diameter vs evoked LC relationship as a function of evoked LC range (Spearman rho = 0.05, p = 0.688 for monkey Ci).
+Baseline LC activity vs evoked pupil relationship as a function of evoked pupil range (Spearman rho = 0.18, p = 0.157 for monkey Ci).
+
+Figure 3 pooled relationships (Spearman, by monkey):
+Baseline-subtracted evoked pupil responses were correlated with baseline pupil (Z-scored residuals; rho = -0.381, p = <0.001 for monkey Oz).
+Baseline-subtracted evoked pupil responses were correlated with baseline pupil (Z-scored residuals; rho = -0.324, p = <0.001 for monkey Ci).
+Baseline-subtracted evoked FR responses were correlated with baseline FR (Z-scored residuals) (rho = -0.242, p = <0.001 for monkey Oz).
+Baseline-subtracted evoked FR responses were correlated with baseline FR (Z-scored residuals) (rho = -0.169, p = <0.001 for monkey Ci).
+Baseline FR (Z-scored residuals) was correlated with baseline pupil (Z-scored residuals) (rho = 0.088, p = <0.001 for monkey Oz).
+Baseline FR (Z-scored residuals) was correlated with baseline pupil (Z-scored residuals) (rho = 0.067, p = <0.001 for monkey Ci).
+Baseline-subtracted evoked FR responses were correlated with baseline-subtracted evoked pupil responses (rho = 0.118, p = <0.001 for monkey Oz).
+Baseline-subtracted evoked FR responses were correlated with baseline-subtracted evoked pupil responses (rho = 0.084, p = <0.001 for monkey Ci).
+Baseline-subtracted evoked FR responses were correlated with baseline pupil (Z-scored residuals) (rho = -0.026, p = 0.3662 for monkey Oz).
+Baseline-subtracted evoked FR responses were correlated with baseline pupil (Z-scored residuals) (rho = -0.019, p = 0.3117 for monkey Ci).
+Baseline FR (Z-scored residuals) was correlated with baseline-subtracted evoked pupil responses (rho = -0.018, p = 0.5385 for monkey Oz).
+Baseline FR (Z-scored residuals) was correlated with baseline-subtracted evoked pupil responses (rho = -0.002, p = 0.9128 for monkey Ci).
+
+Supplementary LLR comparisons (threshold 3.841):
+For evoked pupil vs baseline pupil, 13/82 sessions exceeded the LLR threshold (3.841).
+  Oz: 7/32
+  Ci: 6/50
+For evoked FR vs baseline FR, 5/103 units exceeded the LLR threshold (3.841).
+  Oz: 2/42
+  Ci: 3/61
+For evoked pupil vs baseline FR, 8/103 units exceeded the LLR threshold (3.841).
+  Oz: 4/42
+  Ci: 4/61
+For evoked FR vs baseline pupil, 7/103 units exceeded the LLR threshold (3.841).
+  Oz: 2/42
+  Ci: 5/61
+
+Done.
+
