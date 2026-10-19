@@ -1,6 +1,7 @@
 # Python environment
 .venv/
 .venv*/
+.venv-dandi311/
 
 # macOS
 .DS_Store
