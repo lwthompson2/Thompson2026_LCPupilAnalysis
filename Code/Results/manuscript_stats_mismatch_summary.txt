@@ -1,4 +1,0 @@
-FAIL: MAT and NWB manuscript stats differ.
-First differing character index: 733
-MAT output: /Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis/Code/Results/manuscript_stats_mat.txt
-NWB output: /Users/lowell/Documents/GitHub/LCPupil_Joshi_Analysis/Code/Results/manuscript_stats_nwb.txt

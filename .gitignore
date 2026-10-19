@@ -10,6 +10,9 @@
 # Local machine-specific MATLAB config
 Code/config_paths.m
 
+# Local Dandiset data (do not track large NWB assets)
+002034/
+
 # Generated analysis caches and tables
 Code/Results/*.mat
 Code/Results/*.csv

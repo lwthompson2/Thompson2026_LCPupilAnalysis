@@ -11,11 +11,11 @@ Figure 2 summary-column median tests (Wilcoxon signed-rank vs median = 0):
 Baseline LC activity vs baseline pupil diameter (partial Spearman; residuals): Oz p = 0.000521 (N = 42, median rho = 0.077).
 Baseline LC activity vs baseline pupil diameter (partial Spearman; residuals): Ci p = 1.18e-05 (N = 63, median rho = 0.097).
 Baseline-subtracted evoked LC responses vs baseline-subtracted evoked pupil responses: Oz p = 0.0135 (N = 42, median rho = 0.088).
-Baseline-subtracted evoked LC responses vs baseline-subtracted evoked pupil responses: Ci p = 0.00149 (N = 63, median rho = 0.053).
+Baseline-subtracted evoked LC responses vs baseline-subtracted evoked pupil responses: Ci p = 0.00153 (N = 63, median rho = 0.053).
 Baseline-subtracted evoked LC responses vs baseline LC activity (residuals): Oz p = 5.88e-07 (N = 42, median rho = -0.381).
 Baseline-subtracted evoked LC responses vs baseline LC activity (residuals): Ci p = 1.48e-11 (N = 63, median rho = -0.315).
 Baseline-subtracted evoked pupil responses vs baseline pupil diameter (residuals): Oz p = 1.16e-06 (N = 32, median rho = -0.331).
-Baseline-subtracted evoked pupil responses vs baseline pupil diameter (residuals): Ci p = 1.07e-08 (N = 50, median rho = -0.336).
+Baseline-subtracted evoked pupil responses vs baseline pupil diameter (residuals): Ci p = 1.13e-08 (N = 50, median rho = -0.336).
 Baseline pupil diameter vs baseline-subtracted evoked LC responses: Oz p = 0.915 (N = 42, median rho = 0.033).
 Baseline pupil diameter vs baseline-subtracted evoked LC responses: Ci p = 0.0105 (N = 63, median rho = -0.037).
 Baseline LC activity vs baseline-subtracted evoked pupil responses: Oz p = 0.846 (N = 42, median rho = 0.033).
@@ -66,7 +66,7 @@ Evoked Pupil -> Baseline LC: Ci CV R^2 median = -0.081 (p = 4.67e-10, N = 63).
 Evoked Pupil -> Baseline LC: Ci permutation-significant CV R^2 count = 5/63 (p_perm < 0.05).
 Across-epoch range-impact analyses (legacy correlationsEvokedMag logic):
 Baseline pupil diameter vs evoked LC relationship as a function of evoked LC range (Spearman rho = 0.02, p = 0.89 for monkey Oz).
-Baseline LC activity vs evoked pupil relationship as a function of evoked pupil range (Spearman rho = -0.34, p = 0.0287 for monkey Oz).
+Baseline LC activity vs evoked pupil relationship as a function of evoked pupil range (Spearman rho = -0.33, p = 0.0319 for monkey Oz).
 Baseline pupil diameter vs evoked LC relationship as a function of evoked LC range (Spearman rho = 0.05, p = 0.688 for monkey Ci).
 Baseline LC activity vs evoked pupil relationship as a function of evoked pupil range (Spearman rho = 0.18, p = 0.157 for monkey Ci).
 
@@ -77,12 +77,12 @@ Baseline-subtracted evoked FR responses were correlated with baseline FR (Z-scor
 Baseline-subtracted evoked FR responses were correlated with baseline FR (Z-scored residuals) (rho = -0.169, p = <0.001 for monkey Ci).
 Baseline FR (Z-scored residuals) was correlated with baseline pupil (Z-scored residuals) (rho = 0.088, p = <0.001 for monkey Oz).
 Baseline FR (Z-scored residuals) was correlated with baseline pupil (Z-scored residuals) (rho = 0.067, p = <0.001 for monkey Ci).
-Baseline-subtracted evoked FR responses were correlated with baseline-subtracted evoked pupil responses (rho = 0.117, p = <0.001 for monkey Oz).
+Baseline-subtracted evoked FR responses were correlated with baseline-subtracted evoked pupil responses (rho = 0.118, p = <0.001 for monkey Oz).
 Baseline-subtracted evoked FR responses were correlated with baseline-subtracted evoked pupil responses (rho = 0.084, p = <0.001 for monkey Ci).
 Baseline-subtracted evoked FR responses were correlated with baseline pupil (Z-scored residuals) (rho = -0.026, p = 0.3662 for monkey Oz).
 Baseline-subtracted evoked FR responses were correlated with baseline pupil (Z-scored residuals) (rho = -0.019, p = 0.3116 for monkey Ci).
-Baseline FR (Z-scored residuals) was correlated with baseline-subtracted evoked pupil responses (rho = -0.018, p = 0.5372 for monkey Oz).
-Baseline FR (Z-scored residuals) was correlated with baseline-subtracted evoked pupil responses (rho = -0.002, p = 0.9164 for monkey Ci).
+Baseline FR (Z-scored residuals) was correlated with baseline-subtracted evoked pupil responses (rho = -0.018, p = 0.5378 for monkey Oz).
+Baseline FR (Z-scored residuals) was correlated with baseline-subtracted evoked pupil responses (rho = -0.002, p = 0.9146 for monkey Ci).
 
 Supplementary LLR comparisons (threshold 3.841):
 For evoked pupil vs baseline pupil, 13/82 sessions exceeded the LLR threshold (3.841).

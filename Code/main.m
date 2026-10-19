@@ -5,7 +5,7 @@ addpath(genpath(script_dir));
 run_prediction_cv = true;
 
 paths = config_paths();           % must exist and have results_dir
-outputs = compute_data(paths, struct('force', true));  % force rebuild           % create cached MATs
+outputs = compute_data(paths, struct('force', true, 'source', 'nwb', 'manuscript_filter', true));  % NWB-only rebuild
 
 if run_prediction_cv
 	% Fast default profile for routine reproducibility checks.
